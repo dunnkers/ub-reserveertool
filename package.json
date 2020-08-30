@@ -1,6 +1,10 @@
 {
   "dependencies": {
     "bent": "^7.3.10",
-    "form-urlencoded": "^4.2.1"
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "form-urlencoded": "^4.2.1",
+    "redis": "^3.0.2"
   }
 }
