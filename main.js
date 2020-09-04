@@ -10,19 +10,6 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// class User {
-//     constructor(details) {
-//         this.details = details;
-//     }
-// }
-// let me = new User({
-//     'formData[fname]': 'Jeroen',
-//     'formData[lname]': 'Overschie',
-//     'formData[email]': 'j.g.s.overschie@student.rug.nl',
-//     'formData[phone]': '+31650998154',
-//     'formData[q1]': 's2995697'
-// })
-
 const post = bent(`https://libcal.rug.nl/ajax/event/`,
     'POST', 'json', 200);
 async function beginRegistration(event_id) {
@@ -77,14 +64,27 @@ client.on('error', (err) => console.error('ERR:REDIS:', err));
 app.post('/register', (req, res) => {
     if (!req.body.email) return res.status(500).send('No email supplied')
     if (!req.body.event_id) return res.status(500).send('No event id supplied')
-    console.log('registering ' + req.body.email + ' for event ' + event_id);
+    console.log('registering ' + req.body.email + ' for event ' + req.body.event_id);
     
     client.hgetall(req.body.email, (err, user) => {
         if (!user) return res.status(500).send('No account in db')
+
+        // if already available.
         register(req.body.event_id, user).then(res.json).catch((err) => {
             console.warn(err);
             res.status(500).send('error whilst registering!');
         });
+
+        // schedule reservation.
+        client.sadd(req.body.email+':reservations', req.body.event_id);
+        return res.json({'message':'Made reservation'})
+    });
+});
+
+app.post('/reservations', (req, res) => {
+    if (!req.body.email) return res.status(500).send('No email supplied')
+    client.smembers(req.body.email+':reservations', (err, value) => {
+        return res.json({'reservations':value});
     });
 });
 
@@ -103,8 +103,11 @@ app.post('/identify', (req, res) => {
         return res.json(value);
     });
 });
-app.listen(process.env.PORT, () =>
-    console.log(`Example app listening on port ${process.env.PORT}!`),
+
+client.hdel('j.g.s.overschie@student.rug.nl', 'reservations')
+
+app.listen(3001, () =>
+    console.log(`Example app listening on port 3001!`),
 );
 process.on("exit", function(){
     client.quit();
