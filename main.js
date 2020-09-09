@@ -54,10 +54,10 @@ async function register(event_id, user) {
         });   
 }
 
-const REDISHOST = process.env.REDISHOST || 'localhost';
-const REDISPORT = process.env.REDISPORT || 6379;
-
-const client = redis.createClient(REDISPORT, REDISHOST);
+const host = process.env.REDIS_IP || 'localhost';
+const client = redis.createClient(6379, host, {
+    password: process.env.REDIS_ROOT_PASSWORD || null
+});
 client.on('error', (err) => console.error('ERR:REDIS:', err));
 
 
@@ -104,7 +104,18 @@ app.post('/identify', (req, res) => {
     });
 });
 
-client.hdel('j.g.s.overschie@student.rug.nl', 'reservations')
+app.post('/register_account', (req, res) => {
+    if (!req.body.email) return res.status(500).send('No email supplied');
+    if (!req.body.email) return res.status(500).send('No email supplied');
+    if (!req.body.email) return res.status(500).send('No email supplied');
+    if (!req.body.email) return res.status(500).send('No email supplied');
+    if (!req.body.email) return res.status(500).send('No email supplied');
+    console.log('registering account' + req.body.email);
+    client.hgetall(req.body.email, (err, value) => {
+        console.log('looked up.');
+        return res.json(value);
+    });
+})
 
 app.listen(3001, () =>
     console.log(`Example app listening on port 3001!`),
