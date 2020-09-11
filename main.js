@@ -4,6 +4,7 @@ const redis = require('redis');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const cron = require('node-cron');
 
 const app = express();
 app.use(bodyParser.json()); 
@@ -75,6 +76,21 @@ app.post('/register', (req, res) => {
         
         if (not_open === 'true') {
             console.log('not yet open. cron job for '+startdt);
+            let date = new Date(startdt);
+            
+            const sec = 1;
+            const min = date.getMinutes();
+            const hr = date.getHours();
+            const day = date.getDate() - 4;
+            const month = date.getMonth();
+            cron.schedule(`${sec} ${min} ${hr} ${day} ${month} *`,
+                () => {
+                register(req.body.event_id, user).then(res.json).catch((err) => {
+                    console.warn(err);
+                    res.status(500).send('error whilst registering!');
+                });
+                client.sadd(req.body.email+':reservations', req.body.event_id);
+            });
             return res.json({'message':'Scheduled reservation'});
         } else {
             console.log('already open.');
