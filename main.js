@@ -68,18 +68,27 @@ app.post('/register', (req, res) => {
     if (!req.body.event_id) return res.status(500).send('No event id supplied')
     console.log('registering ' + req.body.email + ' for event ' + req.body.event_id);
     
+    const {fully_booked, not_open, startdt} = req.body;
+    if (fully_booked === 'true') return res.json({'message': 'Fully booked.'})
     client.hgetall(req.body.email, (err, user) => {
         if (!user) return res.status(500).send('No account in db')
+        
+        if (not_open === 'true') {
+            console.log('not yet open. cron job for '+startdt);
+            return res.json({'message':'Scheduled reservation'});
+        } else {
+            console.log('already open.');
 
-        // if already available.
-        register(req.body.event_id, user).then(res.json).catch((err) => {
-            console.warn(err);
-            res.status(500).send('error whilst registering!');
-        });
-
-        // schedule reservation.
-        client.sadd(req.body.email+':reservations', req.body.event_id);
-        return res.json({'message':'Made reservation'})
+            // if already available.
+            register(req.body.event_id, user).then(res.json).catch((err) => {
+                console.warn(err);
+                res.status(500).send('error whilst registering!');
+            });
+    
+            // schedule reservation.
+            client.sadd(req.body.email+':reservations', req.body.event_id);
+            return res.json({'message':'Made reservation'})
+        }
     });
 });
 
@@ -89,13 +98,6 @@ app.post('/reservations', (req, res) => {
         return res.json({'reservations':value});
     });
 });
-
-// app.post('/create', (req, res) => {
-//     if (!req.body.email) return res.status(500).send('No email supplied')
-//     console.log('creating account ' + req.body.email);
-//     client.HMSET(req.body.email, req.body);
-//     res.json({'message': 'Account created.'});
-// });
 
 app.post('/identify', (req, res) => {
     if (!req.body.email) return res.status(500).send('No email supplied');
