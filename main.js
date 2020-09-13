@@ -57,61 +57,87 @@ async function register(event_id, user) {
         });   
 }
 
+async function registration(event_id, email) {
+    return new Promise((resolve, reject) => {
+        client.hgetall(email, (err, user) => {
+            if (!user) reject('no account in db');
+            resolve(user);
+        });
+    }).then(user => {
+        client.sadd(email+':reservations', event_id);
+        return register(event_id, user);
+    });
+}
+
 const host = process.env.REDIS_IP || 'localhost';
 const client = redis.createClient(6379, host, {
     password: process.env.REDIS_ROOT_PASSWORD || null
 });
 client.on('error', (err) => console.error('ERR:REDIS:', err));
 
+function scheduleReservation(event_id, email, startdt) {
+    let date = new Date(startdt);
+    date.setDate(date.getDate() - 4);
+    date.setSeconds(date.getSeconds() + 1);
+
+    // CRON
+    const sec = date.getSeconds();
+    const min = date.getMinutes();
+    const hr = date.getHours();
+    const day = date.getDate();
+    const month = date.getMonth();
+    client.sadd(email+':triggers', event_id);
+    client.HMSET('event_startdts', { [event_id]: startdt });
+    cron.schedule(`${sec} ${min} ${hr} ${day} ${month} *`, () => {
+        registration(event_id, email);
+    });
+
+    console.log('scheduled cron job for '+date)
+}
+
+console.log('get all *:triggers:')
+client.keys('*:triggers', (err, trigger_accounts) => {
+    console.log('looked up triggers.');
+    for (trigger_account of trigger_accounts) {
+        console.log(trigger_account);
+        const email = trigger_account.split(':')[0];
+        client.smembers(trigger_account, (err, triggers) => {
+            for (trigger of triggers) {
+                client.hget('event_startdts',trigger, (err, startdt) => {
+                    scheduleReservation(trigger, email, startdt);
+                });
+            }
+        });
+
+    }
+});
 
 app.post('/register', (req, res) => {
     if (!req.body.email) return res.status(500).send('No email supplied')
     if (!req.body.event_id) return res.status(500).send('No event id supplied')
-    console.log('registering ' + req.body.email + ' for event ' + req.body.event_id);
     
-    const {fully_booked, not_open, startdt} = req.body;
-    if (fully_booked === 'true') return res.json({'message': 'Fully booked.'})
-    client.hgetall(req.body.email, (err, user) => {
-        if (!user) return res.status(500).send('No account in db')
-        
-        if (not_open === 'true') {
-            console.log('not yet open. cron job for '+startdt);
-            let date = new Date(startdt);
-            
-            const sec = 1;
-            const min = date.getMinutes();
-            const hr = date.getHours();
-            const day = date.getDate() - 4;
-            const month = date.getMonth();
-            cron.schedule(`${sec} ${min} ${hr} ${day} ${month} *`,
-                () => {
-                register(req.body.event_id, user).then(res.json).catch((err) => {
-                    console.warn(err);
-                    res.status(500).send('error whilst registering!');
-                });
-                client.sadd(req.body.email+':reservations', req.body.event_id);
-            });
-            return res.json({'message':'Scheduled reservation'});
-        } else {
-            console.log('already open.');
-
-            // if already available.
-            register(req.body.event_id, user).then(res.json).catch((err) => {
-                console.warn(err);
-                res.status(500).send('error whilst registering!');
-            });
-    
-            // schedule reservation.
-            client.sadd(req.body.email+':reservations', req.body.event_id);
-            return res.json({'message':'Made reservation'})
-        }
-    });
+    const {fully_booked, not_open, startdt, event_id, email} = req.body;
+    console.log('registering ' + email + ' for event ' + event_id);
+    if (fully_booked === 'true') return res.json({'message': 'Fully booked.'});
+    if (not_open === 'true') {
+        console.log('not yet open.');
+        scheduleReservation(event_id, email, startdt);
+        res.json({'message': 'Scheduled registration!'});
+    } else {
+        console.log('already open.');
+        registration(event_id, email).then(res => {
+            res.json({'message': 'Made registration.'});
+        }).catch(err => res.status(500).send(err))
+    }
 });
 
 app.post('/reservations', (req, res) => {
     if (!req.body.email) return res.status(500).send('No email supplied')
-    client.smembers(req.body.email+':reservations', (err, value) => {
-        return res.json({'reservations':value});
+    const { email } = req.body;
+    client.smembers(email+':reservations', (err, value) => {
+        client.smembers(email+':triggers', (err, triggers) => {
+            return res.json({'reservations':value, 'triggers':triggers});
+        });
     });
 });
 
@@ -142,8 +168,3 @@ app.listen(3001, () =>
 process.on("exit", function(){
     client.quit();
 });
-
-// client.quit();
-// register(3491811, me).then(() => {
-//     console.log('Registration completed.');
-// }).catch(console.warn);
