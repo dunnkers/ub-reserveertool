@@ -79,20 +79,28 @@ function scheduleReservation(event_id, email, startdt) {
     let date = new Date(startdt);
     date.setDate(date.getDate() - 4);
     date.setSeconds(date.getSeconds() + 1);
+    // date = new Date();
+    // date.setMinutes(date.getMinutes() + 1);
+    // date.setMinutes(date.getMinutes() + 1);
 
     // CRON
     const sec = date.getSeconds();
     const min = date.getMinutes();
     const hr = date.getHours();
     const day = date.getDate();
-    const month = date.getMonth();
+    const month = date.getMonth() + 1; // begins with 0.
     client.sadd(email+':triggers', event_id);
     client.HMSET('event_startdts', { [event_id]: startdt });
+    console.log(`Setting CRON: ${sec} ${min} ${hr} ${day} ${month} *`);
     cron.schedule(`${sec} ${min} ${hr} ${day} ${month} *`, () => {
+        console.log('trigger triggered:',event_id,email);
         registration(event_id, email);
+        client.srem(email+':triggers', event_id);
+    }, {
+        timezone: "Europe/Amsterdam"
     });
 
-    console.log('scheduled cron job for '+date)
+    console.log('> scheduled cron job for '+date)
 }
 
 console.log('get all *:triggers:')

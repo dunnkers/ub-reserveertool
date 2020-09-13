@@ -12,6 +12,7 @@
     "redis-commander": "0.7.0"
   },
   "scripts": {
+    "start": "node main.js",
     "redisgui": "redis-commander --redis-host $REDIS_IP --redis-password $REDIS_ROOT_PASSWORD"
   }
 }
