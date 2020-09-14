@@ -196,10 +196,14 @@ class App extends React.Component {
   cancelReservation = event_id => {
     console.log(event_id); 
     fetch('http://35.228.177.55:3001/cancel_reservation/', this.constructPostForm({
-        email: this.state.email
+        email: this.state.email,
+        event_id
     }))
     .then(response => response.json())
-    .then(() => this.setReservations());
+    .then(() => {
+      message.success('Cancelled event '+event_id);
+      this.setReservations()
+    }).catch(() => message.warn('Could not cancel event '+event_id));
   }
 
   render() {
