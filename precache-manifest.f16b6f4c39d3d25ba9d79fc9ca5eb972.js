@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "c8b2c763ddd576858e61f75e1b5102b4",
+    "revision": "c91b91e6977ae129c6fb615f9e92d01e",
     "url": "/ub-reserveertool/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/ub-reserveertool/static/css/2.847e01e0.chunk.css"
   },
   {
-    "revision": "abf05ce6b270fe9091d3",
+    "revision": "22c8bebbd3c7c3fa0c54",
     "url": "/ub-reserveertool/static/css/main.31ed380b.chunk.css"
   },
   {
@@ -20,8 +20,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/ub-reserveertool/static/js/2.cf345959.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "abf05ce6b270fe9091d3",
-    "url": "/ub-reserveertool/static/js/main.f31f7fa9.chunk.js"
+    "revision": "22c8bebbd3c7c3fa0c54",
+    "url": "/ub-reserveertool/static/js/main.44ef0299.chunk.js"
   },
   {
     "revision": "dbe9d78d5fb24e532a15",

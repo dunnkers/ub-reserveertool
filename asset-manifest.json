@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/ub-reserveertool/static/css/main.31ed380b.chunk.css",
-    "main.js": "/ub-reserveertool/static/js/main.f31f7fa9.chunk.js",
-    "main.js.map": "/ub-reserveertool/static/js/main.f31f7fa9.chunk.js.map",
+    "main.js": "/ub-reserveertool/static/js/main.44ef0299.chunk.js",
+    "main.js.map": "/ub-reserveertool/static/js/main.44ef0299.chunk.js.map",
     "runtime-main.js": "/ub-reserveertool/static/js/runtime-main.6ddc754e.js",
     "runtime-main.js.map": "/ub-reserveertool/static/js/runtime-main.6ddc754e.js.map",
     "static/css/2.847e01e0.chunk.css": "/ub-reserveertool/static/css/2.847e01e0.chunk.css",
     "static/js/2.cf345959.chunk.js": "/ub-reserveertool/static/js/2.cf345959.chunk.js",
     "static/js/2.cf345959.chunk.js.map": "/ub-reserveertool/static/js/2.cf345959.chunk.js.map",
     "index.html": "/ub-reserveertool/index.html",
-    "precache-manifest.61b0ae97e9c1b76b307af7b3b61b92b1.js": "/ub-reserveertool/precache-manifest.61b0ae97e9c1b76b307af7b3b61b92b1.js",
+    "precache-manifest.f16b6f4c39d3d25ba9d79fc9ca5eb972.js": "/ub-reserveertool/precache-manifest.f16b6f4c39d3d25ba9d79fc9ca5eb972.js",
     "service-worker.js": "/ub-reserveertool/service-worker.js",
     "static/css/2.847e01e0.chunk.css.map": "/ub-reserveertool/static/css/2.847e01e0.chunk.css.map",
     "static/css/main.31ed380b.chunk.css.map": "/ub-reserveertool/static/css/main.31ed380b.chunk.css.map",
@@ -20,6 +20,6 @@
     "static/css/2.847e01e0.chunk.css",
     "static/js/2.cf345959.chunk.js",
     "static/css/main.31ed380b.chunk.css",
-    "static/js/main.f31f7fa9.chunk.js"
+    "static/js/main.44ef0299.chunk.js"
   ]
 }
