@@ -6,7 +6,8 @@
     "express": "^4.17.1",
     "form-urlencoded": "^4.2.1",
     "node-cron": "^2.0.3",
-    "redis": "^3.0.2"
+    "redis": "^3.0.2",
+    "tz-offset": "^0.0.2"
   },
   "devDependencies": {
     "redis-commander": "0.7.0"

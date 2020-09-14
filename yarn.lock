@@ -3081,6 +3081,11 @@ tz-offset@0.0.1:
   resolved "https://registry.yarnpkg.com/tz-offset/-/tz-offset-0.0.1.tgz#fef920257024d3583ed9072a767721a18bdb8a76"
   integrity sha512-kMBmblijHJXyOpKzgDhKx9INYU4u4E1RPMB0HqmKSgWG8vEcf3exEfLh4FFfzd3xdQOw9EuIy/cP0akY6rHopQ==
 
+tz-offset@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/tz-offset/-/tz-offset-0.0.2.tgz#1c30fcaeff1fbbc09c85c8eec1a6d37b3a0a61ae"
+  integrity sha512-nCaj0ZpQ8j8iySMJi8G829wgbTQv2EuZe3JVIOWAYQGd2TZf0bOF8TGXz8j2g17B5WDoW85lt15zguh6OnnRZw==
+
 uglify-es@^3.3.9:
   version "3.3.9"
   resolved "https://registry.yarnpkg.com/uglify-es/-/uglify-es-3.3.9.tgz#0c1c4f0700bed8dbc124cdb304d2592ca203e677"

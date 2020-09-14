@@ -77,28 +77,38 @@ const client = redis.createClient(6379, host, {
 client.on('error', (err) => console.error('ERR:REDIS:', err));
 
 function scheduleReservation(event_id, email, startdt) {
+    // 4 days in advance
     let date = new Date(startdt);
     date.setDate(date.getDate() - 4);
     date.setSeconds(date.getSeconds() + 1);
 
-    // CRON
+    // correct for server time
+    // node-cron dep tz-offset out of date so timezones not working correctly.
+    servertime = new Date();
+    localtime = new Date(new Date()
+    .toLocaleString("nl-NL", { timeZone: "Europe/Amsterdam" }));
+    const timediff = localtime.getHours() - servertime.getHours();
+    console.log('server time:', servertime.toString(),
+        'local time: ', localtime.toString(), ' >> diff=', timediff);
+    date.setHours(date.getHours() + timediff);
+    
+    // compute cron date format
     const sec = date.getSeconds();
     const min = date.getMinutes();
     const hr = date.getHours();
     const day = date.getDate();
-    const month = date.getMonth() + 1; // begins with 0.
+    const month = date.getMonth() + 1; // begins with 0, cron needs 1.
+    
+    // set CRON
+    console.log(`Setting CRON: ${sec} ${min} ${hr} ${day} ${month} *`,
+        '(date=',date,')');
     client.sadd(email+':triggers', event_id);
     client.HMSET('event_startdts', { [event_id]: startdt });
-    console.log(`Setting CRON: ${sec} ${min} ${hr} ${day} ${month} *`);
     cron.schedule(`${sec} ${min} ${hr} ${day} ${month} *`, () => {
         console.log('trigger triggered:',event_id,email);
         registration(event_id, email);
         client.srem(email+':triggers', event_id);
-    }, {
-        timezone: "Europe/Amsterdam"
     });
-
-    console.log('> scheduled cron job for '+date)
 }
 
 console.log('get all *:triggers:')
@@ -159,9 +169,8 @@ app.post('/reservations', (req, res) => {
 
 app.post('/identify', (req, res) => {
     if (!req.body.email) return res.status(500).send('No email supplied');
-    console.log('looking up info for ' + req.body.email);
     client.hgetall(req.body.email, (err, value) => {
-        console.log('looked up.');
+        console.log('logged in '+req.body.email);
         return res.json(value);
     });
 });

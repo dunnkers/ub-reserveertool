@@ -15,6 +15,9 @@ class StudySlot extends React.Component {
     const regmsg = result.registration_msg;
     const fully_booked = regmsg && regmsg.msg.includes('fully booked');
     const not_open = regmsg && regmsg.msg.includes('Registrations open at');
+    let triggertime = new Date(result.startdt);
+    triggertime.setDate(triggertime.getDate() - 4);
+    let triggerdate = triggertime.toDateString() + ' ' + triggertime.toLocaleTimeString();
     return (
       <Card
         key={result.id}
@@ -43,24 +46,34 @@ class StudySlot extends React.Component {
         }
         style={{ width: 400, margin: '10px' }}
         actions={[
-          <Button
-            type="default"
-            icon={booked ? 
-              (trigger ? <BellOutlined key="trigger" /> :
-                <CheckOutlined key="booked" />) :
+          <Tooltip title={booked ? 
+              (trigger ? "Trigger set for " + triggerdate :
+                "You are booked in ✓") :
               (result.registration_enabled ?
-              <EditOutlined key="edit" /> :
-              <BellOutlined key="schedule" />)}
-            onClick={() => this.props.planReservering(result)}
-            disabled={!account || fully_booked || booked}
-            />,
-            <>{trigger &&
-              <Button 
-                onClick={() => this.props.cancelReservering(result)}
-                  type="default"
-                  icon={<CloseCircleOutlined key="cancel" />}
-
-              />}
+                "Book in now" :
+                (fully_booked ? "Full" : "Book in when reservations open"))}>
+            <Button
+              type="default"
+              icon={booked ? 
+                (trigger ? <BellOutlined key="trigger" /> :
+                  <CheckOutlined key="booked" />) :
+                (result.registration_enabled ?
+                <EditOutlined key="edit" /> :
+                <BellOutlined key="schedule" />)}
+              onClick={() => this.props.planReservering(result)}
+              disabled={!account || fully_booked || booked}
+              />
+            </Tooltip>,
+            <>{(trigger || booked) &&
+              <Tooltip title={trigger ?
+                "Cancel scheduled reservation" : "Cancel via email"}>
+                <Button 
+                    onClick={() => this.props.cancelReservering(result)}
+                    type="default"
+                    icon={<CloseCircleOutlined key="cancel" />}
+                    disabled={!trigger}
+                />
+              </Tooltip>}
             </>
         ]}>
         {result.title}

@@ -7,3 +7,12 @@ By Jeroen Overschie
 3. `docker push dunnkers/ub-reserveertool:backend`
 4. `kubectl delete deployments/ub-backend`
 5. `kubectl apply -f gcp.yaml`
+
+
+```shell
+docker build -t ub-backend .
+docker tag ub-backend:latest dunnkers/ub-reserveertool:backend
+docker push dunnkers/ub-reserveertool:backend
+kubectl delete deployments/ub-backend
+kubectl apply -f gcp.yaml
+```
