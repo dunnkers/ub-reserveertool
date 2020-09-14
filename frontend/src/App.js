@@ -86,9 +86,7 @@ class App extends React.Component {
     .done((data) => this.setState({...data }))
 
     const email = localStorage.getItem('email');
-    if (email) this.identify(email).then(() => {
-      return this.setReservations();
-    })
+    if (email) this.identify(email);
   }
 
   constructPostForm(json) {
@@ -119,8 +117,10 @@ class App extends React.Component {
           this.setState({account:result, email})
           localStorage.setItem('email', email);
         } else message.warn('Invalid login for '+email)
+        return result;
     })
-    .catch (error => console.log('Request failed', error));   
+    .catch (error => console.log('Request failed', error))
+    .then(() => this.setReservations());
   }
 
   login(email) {
