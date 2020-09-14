@@ -56,8 +56,9 @@ class StudySlot extends React.Component {
             />,
             <>{trigger &&
               <Button 
+                onClick={() => this.props.cancelReservering(result)}
                   type="default"
-                  icon={<CloseCircleOutlined />}
+                  icon={<CloseCircleOutlined key="cancel" />}
 
               />}
             </>
@@ -192,6 +193,15 @@ class App extends React.Component {
     })
   }
 
+  cancelReservation = event_id => {
+    console.log(event_id); 
+    fetch('http://35.228.177.55:3001/cancel_reservation/', this.constructPostForm({
+        email: this.state.email
+    }))
+    .then(response => response.json())
+    .then(() => this.setReservations());
+  }
+
   render() {
     return (
       <div className="App">
@@ -287,6 +297,9 @@ class App extends React.Component {
                 const booked = this.state.reservations.includes(String(result.id)) ||
                                 trigger;
                 return <StudySlot key={result.id}
+                                  cancelReservering={
+                                    (result) => this.cancelReservation(result.id)
+                                  }
                                   slotinfo={result} account={this.state.account}
                                   booked={booked} trigger={trigger}/>
               })

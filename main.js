@@ -58,6 +58,7 @@ async function register(event_id, user) {
 }
 
 async function registration(event_id, email) {
+    console.log(`performing registration for user ${email}, event ${event_id}`)
     return new Promise((resolve, reject) => {
         client.hgetall(email, (err, user) => {
             if (!user) reject('no account in db');
@@ -79,9 +80,6 @@ function scheduleReservation(event_id, email, startdt) {
     let date = new Date(startdt);
     date.setDate(date.getDate() - 4);
     date.setSeconds(date.getSeconds() + 1);
-    // date = new Date();
-    // date.setMinutes(date.getMinutes() + 1);
-    // date.setMinutes(date.getMinutes() + 1);
 
     // CRON
     const sec = date.getSeconds();
@@ -118,6 +116,16 @@ client.keys('*:triggers', (err, trigger_accounts) => {
         });
 
     }
+});
+
+app.post('/cancel_reservation', (req, res) => {
+    if (!req.body.email) return res.status(500).send('No email supplied')
+    if (!req.body.event_id) return res.status(500).send('No event id supplied')
+
+    const {event_id, email} = req.body;
+    console.log('removing trigger ' + event_id + ' for user ' + email);
+    client.srem(email+':triggers', event_id);
+    res.json({'message': 'Removed trigger'});
 });
 
 app.post('/register', (req, res) => {
