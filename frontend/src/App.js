@@ -5,6 +5,7 @@ import React from 'react';
 import './App.css';
 import StudySlot from './StudySlot';
 import Account from './Account';
+import BookingPage from './BookingPage';
 import { constructPostForm } from './util'; 
 
 class App extends React.Component {
@@ -15,9 +16,6 @@ class App extends React.Component {
 
   componentDidMount() {
     $.ajax({
-      headers: {
-        'SameSite': 'None'
-      },
       url: 'https://libcal.rug.nl/ajax/calendar/list?c=7564&date=0000-00-00&perpage=96&page=1&audience=undefined&cats=&camps=&inc=0',
       dataType: 'jsonp'
     })
@@ -74,13 +72,15 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <p>UB reserveertool</p>
+        <div className="logo">UB Reserveertool</div>
           <Account 
             setReservations={() => this.setReservations()}
             setAccount={accinfo => this.setState(accinfo)}
+            style={{float:'right'}}
             />
-        </header>
+        {/* <BookingPage
+          account={this.state.account}
+          email={this.state.email} /> */}
         <div style={{display:'flex'}}>
           <div style={{margin:'20px'}}>
             <h2>Make reservations</h2>
@@ -102,18 +102,18 @@ class App extends React.Component {
           <div style={{margin:'20px'}}>
             <h2>My reservations</h2>
             {
-              this.state.reservations.map(reservation => {
+              this.state.reservations.map((reservation, i) => {
                 const result = this.state.results.find(
                   res => String(res.id) === reservation);
                 if (!result) {
                   console.warn('no slot found for ' + reservation);
-                  return <div key={0}></div>;
+                  return <div key={i}></div>;
                 }
 
                 const trigger = this.state.triggers.includes(String(result.id));
                 const booked = this.state.reservations.includes(String(result.id)) ||
                                 trigger;
-                return <StudySlot key={result.id}
+                return <StudySlot key={i}
                                   cancelReservering={
                                     (result) => this.cancelReservation(result.id)
                                   }

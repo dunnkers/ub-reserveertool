@@ -2,8 +2,7 @@ import React from 'react';
 import { Badge,
      Button,
      Card,
-     Tooltip,
-     message } from 'antd';
+     Tooltip } from 'antd';
 import { CloseCircleOutlined,
         EditOutlined,
         BellOutlined,

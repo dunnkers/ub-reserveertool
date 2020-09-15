@@ -2,9 +2,10 @@ import { UserOutlined,
     LogoutOutlined,
     UserAddOutlined,
     LoginOutlined } from '@ant-design/icons';
-import { Dropdown, Avatar, Button, Input, Menu, message, Form, Modal } from 'antd';
+import { Button, Input, Menu, message, Form, Modal } from 'antd';
 import React from 'react';
 import { constructPostForm } from './util'; 
+const { SubMenu } = Menu;
 
 export default class Account extends React.Component {
     constructor(props) {
@@ -22,11 +23,12 @@ export default class Account extends React.Component {
         .then(response => response.json())
         .then(result => {
             if (result) {
-                message.success('Logged into '+email);
-                localStorage.setItem('email', email);
-                const accinfo = { account:result, email };
-                this.setState(accinfo);
-                this.props.setAccount(accinfo);
+              const localst_email = localStorage.getItem('email');
+              if (!localst_email) message.success('Logged into '+email);
+              localStorage.setItem('email', email);
+              const accinfo = { account:result, email };
+              this.setState(accinfo);
+              this.props.setAccount(accinfo);
             } else message.warn('Invalid login for '+email)
             return result;
         })
@@ -73,62 +75,59 @@ export default class Account extends React.Component {
 
     render() {
         return (
-        <div>
-            <Dropdown overlay={
-              <Menu onClick={this.handleClick}>
-                {this.state.account && 
-                  <Menu.Item key="logout" icon={<LogoutOutlined />}>Logout</Menu.Item>}
-                {!this.state.account && 
-                  <Menu.Item key="register_account" icon={<UserAddOutlined />}>Register</Menu.Item>}
-                {!this.state.account && 
-                  <Menu.Item key="login" icon={<LoginOutlined />}>Login</Menu.Item>}
-              </Menu>
-            } trigger={['click']}>
-              <Button type='primary' icon={<Avatar size="small" icon={<UserOutlined />} />}
-                style={{background: 'none', border: 'none'}}>
-                {this.state.account ? 
-                  <>&nbsp;{this.state.account.fname}&nbsp;{this.state.account.lname}</>
-                  : <></>}
-              </Button>
-            </Dropdown>
-            <Modal title="Login" visible={this.state.loginVisible}
-              onCancel={() => this.setState({ loginVisible: false })}
-              footer={[]}>
-              <Input prefix={<UserOutlined />} placeholder="RUG email"
-                onPressEnter={(e) => this.login(e.target.value)}
-                style={{width: 250}} />
-            </Modal>
-            <Modal title="Register" visible={this.state.registerVisible}
-              onCancel={() => this.setState({ registerVisible: false })}
-              footer={[]} onOk={(user) => this.registerAccount(user)}>
-              <Form name="registration" onFinish={(user) => {
-                this.registerAccount(user)
-              }}>
-                <Form.Item name={['formData[fname]']} label="First Name" rules={[{ required: true }]}>
-                  <Input />
-                </Form.Item>
-                <Form.Item name={['formData[lname]']} label="Last Name" rules={[{ required: true }]}>
-                  <Input />
-                </Form.Item>
-                <Form.Item name={['formData[email]']} label="Email" rules={[{ type: 'email', required: true }]}>
-                  <Input />
-                </Form.Item>
-                <Form.Item name={['formData[phone]']} label="Phone Number" rules={[{ required: true }]}>
-                  <Input />
-                </Form.Item>
-                <Form.Item name={['formData[q1]']} label="S- or P-number" rules={[{ required: true }]}>
-                  <Input />
-                </Form.Item>
-                <Form.Item>
-                  <Button type="primary" htmlType="submit" loading={
-                    this.state.registerLoading
-                  }>
-                    Submit
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Modal>
-        </div>
+          <Menu theme="dark" mode="horizontal">
+            <SubMenu style={{float:'right'}}
+              key="sub1"
+              icon={<UserOutlined />}
+              title={this.state.account ? 
+                `${this.state.account.fname} ${this.state.account.lname}` : ''}
+              onClick={this.handleClick}>
+              {this.state.account && 
+                <Menu.Item key="logout" icon={<LogoutOutlined />}>Logout</Menu.Item>}
+              {!this.state.account && 
+                <Menu.Item key="register_account" icon={<UserAddOutlined />}>Register</Menu.Item>}
+              {!this.state.account && 
+                <Menu.Item key="login" icon={<LoginOutlined />}>Login</Menu.Item>}
+
+              <Modal title="Login" visible={this.state.loginVisible}
+                onCancel={() => this.setState({ loginVisible: false })}
+                footer={[]}>
+                <Input prefix={<UserOutlined />} placeholder="RUG email"
+                  onPressEnter={(e) => this.login(e.target.value)}
+                  style={{width: 250}} />
+              </Modal>
+              <Modal title="Register" visible={this.state.registerVisible}
+                onCancel={() => this.setState({ registerVisible: false })}
+                footer={[]} onOk={(user) => this.registerAccount(user)}>
+                <Form name="registration" onFinish={(user) => {
+                  this.registerAccount(user)
+                }}>
+                  <Form.Item name={['formData[fname]']} label="First Name" rules={[{ required: true }]}>
+                    <Input />
+                  </Form.Item>
+                  <Form.Item name={['formData[lname]']} label="Last Name" rules={[{ required: true }]}>
+                    <Input />
+                  </Form.Item>
+                  <Form.Item name={['formData[email]']} label="Email" rules={[{ type: 'email', required: true }]}>
+                    <Input />
+                  </Form.Item>
+                  <Form.Item name={['formData[phone]']} label="Phone Number" rules={[{ required: true }]}>
+                    <Input />
+                  </Form.Item>
+                  <Form.Item name={['formData[q1]']} label="S- or P-number" rules={[{ required: true }]}>
+                    <Input />
+                  </Form.Item>
+                  <Form.Item>
+                    <Button type="primary" htmlType="submit" loading={
+                      this.state.registerLoading
+                    }>
+                      Submit
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </Modal>
+          </SubMenu>
+        </Menu>
         );
     }
 }
