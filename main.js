@@ -157,9 +157,15 @@ app.post('/register', (req, res) => {
 app.post('/reservations', (req, res) => {
     if (!req.body.email) return res.status(500).send('No email supplied')
     const { email } = req.body;
-    client.smembers(email+':reservations', (err, value) => {
-        client.smembers(email+':triggers', (err, triggers) => {
-            return res.json({'reservations':value, 'triggers':triggers});
+    client.hgetall('event_startdts', (err, startdts) => {
+        client.smembers(email+':reservations', (err, value) => {
+            client.smembers(email+':triggers', (err, triggers) => {
+                return res.json({
+                    'reservations':value,
+                    'triggers':triggers,
+                    'startdts': startdts
+                });
+            });
         });
     });
 });

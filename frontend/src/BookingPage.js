@@ -4,50 +4,6 @@ import moment from 'moment';
 import $ from 'jquery';
 import { constructPostForm } from './util'; 
 
-function getListData(value) {
-    let listData;
-    switch (value.date()) {
-      case 8:
-        listData = [
-          { type: 'warning', content: 'This is warning event.' },
-          { type: 'success', content: 'This is usual event.' },
-        ];
-        break;
-      case 10:
-        listData = [
-          { type: 'warning', content: 'This is warning event.' },
-          { type: 'success', content: 'This is usual event.' },
-          { type: 'error', content: 'This is error event.' },
-        ];
-        break;
-      case 15:
-        listData = [
-          { type: 'warning', content: 'This is warning event' },
-          { type: 'success', content: 'This is very long usual event。。....' },
-          { type: 'error', content: 'This is error event 1.' },
-          { type: 'error', content: 'This is error event 2.' },
-          { type: 'error', content: 'This is error event 3.' },
-          { type: 'error', content: 'This is error event 4.' },
-        ];
-        break;
-      default:
-    }
-    return listData || [];
-  }
-  
-  function dateCellRender(value) {
-    const listData = getListData(value);
-    return (
-      <ul className="events">
-        {listData.map(item => (
-          <li key={item.content}>
-            <Badge status={item.type} text={item.content} />
-          </li>
-        ))}
-      </ul>
-    );
-  }
-
 export default class BookingPage extends React.Component {
     state = {
         value: moment(new Date()),
@@ -71,7 +27,8 @@ export default class BookingPage extends React.Component {
         .then(data => {
             const triggers = data.triggers;
             const reservations = data.reservations.concat(triggers);
-            this.setState({ reservations, triggers });
+            const startdts = data.startdts;
+            this.setState({ reservations, triggers, startdts });
         })
     }
 
@@ -94,21 +51,30 @@ export default class BookingPage extends React.Component {
     };
 
     dateCellRender(value) {
-      const date = value.date();
-    //   console.log(date);
-    //   for (reservation of this.state.reservations) {
-    //     reservation
-    //   }
+        const date = value.date();
+        //   console.log(date);
+        const { reservations, triggers, startdts } = this.state;
+        const listData = [];
+        for (let reservation of reservations) {
+            if (!(reservation in startdts)) continue;
+            let startdt = startdts[reservation];
+            let eventdate = moment(startdt);
+            
+            if (eventdate.isSame(date, 'day')) {
+                console.log('SAME',eventdate, reservation)
+                listData.append(reservation);
+            }
+        }
 
-      return (
-        <ul className="events">
-          {/* {listData.map(item => (
-            <li key={item.content}>
-              <Badge status={item.type} text={item.content} />
-            </li>
-          ))} */}
-        </ul>
-      );
+        return (
+            <ul className="events">
+                {listData.map(item => (
+                <li key={item}>
+                    <Badge status={item} text={item} />
+                </li>
+                ))}
+            </ul>
+        );
     }
     
 
@@ -116,14 +82,10 @@ export default class BookingPage extends React.Component {
     const { value } = this.state;
     return (
       <div style={{padding:'10px'}}>
-        {
-            this.state.reservations.map((reservation, i) => {
-                return <div>{i}</div>
-            })
-        }
+          {/* Calendar doesn't update when this.reservations have been set. */}
         <Calendar value={value}
             onSelect={this.onSelect}
-            dateCellRender={this.dateCellRender}
+            dateCellRender={(e) => this.dateCellRender(e)}
             />
       </div>
     )

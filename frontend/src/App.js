@@ -78,9 +78,9 @@ class App extends React.Component {
             setAccount={accinfo => this.setState(accinfo)}
             style={{float:'right'}}
             />
-        {/* <BookingPage
+        <BookingPage
           account={this.state.account}
-          email={this.state.email} /> */}
+          email={this.state.email} />
         <div style={{display:'flex'}}>
           <div style={{margin:'20px'}}>
             <h2>Make reservations</h2>
