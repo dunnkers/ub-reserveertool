@@ -15,5 +15,6 @@
   "scripts": {
     "start": "node main.js",
     "redisgui": "redis-commander --redis-host $REDIS_IP --redis-password $REDIS_ROOT_PASSWORD"
-  }
+  },
+  "license": "MIT"
 }

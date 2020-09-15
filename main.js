@@ -76,20 +76,19 @@ const client = redis.createClient(6379, host, {
 });
 client.on('error', (err) => console.error('ERR:REDIS:', err));
 
+servertime = new Date();
+localtime = new Date(new Date()
+    .toLocaleString("nl-NL", { timeZone: "Europe/Amsterdam" }));
+const timediff = servertime.getHours() - localtime.getHours();
+console.log('TIMEZONE CORRECTION', 'server time:', servertime.toString(),
+    'local time: ', localtime.toString(), ' >> diff=', timediff);
 function scheduleReservation(event_id, email, startdt) {
     // 4 days in advance
     let date = new Date(startdt);
     date.setDate(date.getDate() - 4);
     date.setSeconds(date.getSeconds() + 1);
 
-    // correct for server time
     // node-cron dep tz-offset out of date so timezones not working correctly.
-    servertime = new Date();
-    localtime = new Date(new Date()
-    .toLocaleString("nl-NL", { timeZone: "Europe/Amsterdam" }));
-    const timediff = localtime.getHours() - servertime.getHours();
-    console.log('server time:', servertime.toString(),
-        'local time: ', localtime.toString(), ' >> diff=', timediff);
     date.setHours(date.getHours() + timediff);
     
     // compute cron date format
@@ -101,7 +100,7 @@ function scheduleReservation(event_id, email, startdt) {
     
     // set CRON
     console.log(`Setting CRON: ${sec} ${min} ${hr} ${day} ${month} *`,
-        '(date=',date,')');
+        `(date=${date}, event=${event_id}, email=${email})`);
     client.sadd(email+':triggers', event_id);
     client.HMSET('event_startdts', { [event_id]: startdt });
     cron.schedule(`${sec} ${min} ${hr} ${day} ${month} *`, () => {
@@ -111,11 +110,9 @@ function scheduleReservation(event_id, email, startdt) {
     });
 }
 
-console.log('get all *:triggers:')
+console.log('Get all `*:triggers` keys. Setting triggers...')
 client.keys('*:triggers', (err, trigger_accounts) => {
-    console.log('looked up triggers.');
     for (trigger_account of trigger_accounts) {
-        console.log(trigger_account);
         const email = trigger_account.split(':')[0];
         client.smembers(trigger_account, (err, triggers) => {
             for (trigger of triggers) {
