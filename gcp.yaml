@@ -41,6 +41,16 @@
                   secretKeyRef:
                     key: redis-password
                     name: my-redis
+              - name: GSZV_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    key: user
+                    name: gszv-info
+              - name: GSZV_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    key: password
+                    name: gszv-info
               - name: REDIS_IP
                 value: my-redis-headless
   

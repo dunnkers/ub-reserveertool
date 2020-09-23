@@ -83,6 +83,7 @@ export default class BookingPage extends React.Component {
     return (
       <div style={{padding:'10px'}}>
           {/* Calendar doesn't update when this.reservations have been set. */}
+          {/* fetch just the booking in LibCal corresponding to this month. */}
         <Calendar value={value}
             onSelect={this.onSelect}
             dateCellRender={(e) => this.dateCellRender(e)}
