@@ -3,14 +3,18 @@ import { UserOutlined,
     UserAddOutlined,
     LoginOutlined } from '@ant-design/icons';
 import { Button, Input, Menu, message, Form, Modal } from 'antd';
-import React from 'react';
+import React, { createRef } from 'react';
 import { constructPostForm } from './util'; 
 const { SubMenu } = Menu;
 
 export default class Account extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+          registerVisible: false,
+          loginVisible: false,
+          loginValue: ''
+        };
     }
 
     componentDidMount() {
@@ -73,8 +77,60 @@ export default class Account extends React.Component {
         }
     }
 
+    doStateChange(state) {
+      this.setState(state);
+    }
+
     render() {
+      let loginValue = createRef();
         return (
+          <>
+          <Modal title="Login" visible={this.state.loginVisible}
+            onCancel={() => this.setState({ loginVisible: false })}
+            footer={[]}>
+            <Input prefix={<UserOutlined />} placeholder="RUG email"
+              onPressEnter={(e) => this.login(e.target.value)}
+              ref={loginValue}
+              style={{width: 250}} />
+            <Button type="primary" onClick={() => {
+              this.login(loginValue.current.input.value)
+            }
+              }>
+              Login
+            </Button>
+          </Modal>
+          <Modal title="Register" visible={this.state.registerVisible}
+            onCancel={(e) => {
+              this.setState({ registerVisible: false })
+            }}
+            footer={[]} onOk={(user) => this.registerAccount(user)}>
+            <Form name="registration" onFinish={(user) => {
+              this.registerAccount(user)
+            }}>
+              <Form.Item name={['formData[fname]']} label="First Name" rules={[{ required: true }]}>
+                <Input />
+              </Form.Item>
+              <Form.Item name={['formData[lname]']} label="Last Name" rules={[{ required: true }]}>
+                <Input />
+              </Form.Item>
+              <Form.Item name={['formData[email]']} label="Email" rules={[{ type: 'email', required: true }]}>
+                <Input />
+              </Form.Item>
+              <Form.Item name={['formData[phone]']} label="Phone Number" rules={[{ required: true }]}>
+                <Input />
+              </Form.Item>
+              <Form.Item name={['formData[q1]']} label="S- or P-number" rules={[{ required: true }]}>
+                <Input />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit" loading={
+                  this.state.registerLoading
+                }>
+                  Submit
+                </Button>
+              </Form.Item>
+            </Form>
+          </Modal>
           <Menu theme="dark" mode="horizontal">
             <SubMenu style={{float:'right'}}
               key="sub1"
@@ -88,46 +144,9 @@ export default class Account extends React.Component {
                 <Menu.Item key="register_account" icon={<UserAddOutlined />}>Register</Menu.Item>}
               {!this.state.account && 
                 <Menu.Item key="login" icon={<LoginOutlined />}>Login</Menu.Item>}
-
-              <Modal title="Login" visible={this.state.loginVisible}
-                onCancel={() => this.setState({ loginVisible: false })}
-                footer={[]}>
-                <Input prefix={<UserOutlined />} placeholder="RUG email"
-                  onPressEnter={(e) => this.login(e.target.value)}
-                  style={{width: 250}} />
-              </Modal>
-              <Modal title="Register" visible={this.state.registerVisible}
-                onCancel={() => this.setState({ registerVisible: false })}
-                footer={[]} onOk={(user) => this.registerAccount(user)}>
-                <Form name="registration" onFinish={(user) => {
-                  this.registerAccount(user)
-                }}>
-                  <Form.Item name={['formData[fname]']} label="First Name" rules={[{ required: true }]}>
-                    <Input />
-                  </Form.Item>
-                  <Form.Item name={['formData[lname]']} label="Last Name" rules={[{ required: true }]}>
-                    <Input />
-                  </Form.Item>
-                  <Form.Item name={['formData[email]']} label="Email" rules={[{ type: 'email', required: true }]}>
-                    <Input />
-                  </Form.Item>
-                  <Form.Item name={['formData[phone]']} label="Phone Number" rules={[{ required: true }]}>
-                    <Input />
-                  </Form.Item>
-                  <Form.Item name={['formData[q1]']} label="S- or P-number" rules={[{ required: true }]}>
-                    <Input />
-                  </Form.Item>
-                  <Form.Item>
-                    <Button type="primary" htmlType="submit" loading={
-                      this.state.registerLoading
-                    }>
-                      Submit
-                    </Button>
-                  </Form.Item>
-                </Form>
-              </Modal>
-          </SubMenu>
-        </Menu>
+            </SubMenu>
+          </Menu>
+        </>
         );
     }
 }
