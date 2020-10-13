@@ -47,7 +47,7 @@ export default class StudySlot extends React.Component {
             </Tooltip>
           </>
         }
-        style={{ width: 400, margin: '10px' }}
+        style={{ maxWidth: 500, margin: '10px' }}
         actions={[
           <Tooltip title={booked ? 
               (trigger ? "Trigger set for " + triggerdate :

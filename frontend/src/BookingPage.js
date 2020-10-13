@@ -3,6 +3,7 @@ import { Calendar, Badge } from 'antd';
 import moment from 'moment';
 import $ from 'jquery';
 import { constructPostForm } from './util'; 
+import 'moment/locale/nl';
 
 export default class BookingPage extends React.Component {
     state = {
@@ -50,9 +51,7 @@ export default class BookingPage extends React.Component {
         this.setState({ value });
     };
 
-    dateCellRender(value) {
-        const date = value.date();
-        //   console.log(date);
+    dateCellRender(date) {
         const { reservations, triggers, startdts } = this.state;
         const listData = [];
         for (let reservation of reservations) {
@@ -60,19 +59,29 @@ export default class BookingPage extends React.Component {
             let startdt = startdts[reservation];
             let eventdate = moment(startdt);
             
-            if (eventdate.isSame(date, 'day')) {
-                console.log('SAME',eventdate, reservation)
-                listData.append(reservation);
-            }
+            if (!eventdate.isSame(date, 'day')) continue;
+
+            const result = this.props.results.find(
+                res => String(res.id) === reservation);
+            if (!result) continue;
+                
+            const trigger = triggers.includes(String(reservation));
+            listData.push({reservation, result, trigger});
         }
 
         return (
             <ul className="events">
-                {listData.map(item => (
-                <li key={item}>
-                    <Badge status={item} text={item} />
-                </li>
-                ))}
+                {listData.map(item => {
+                    let location = item.result.location.replace(
+                        'Reading room, ', '');
+                    return (
+                        <li key={item.reservation}>
+                            <Badge status={
+                                item.trigger ? "processing" : "success"
+                            } text={item.result.start + ' ' + location} />
+                        </li>
+                    )
+                })}
             </ul>
         );
     }
@@ -86,6 +95,7 @@ export default class BookingPage extends React.Component {
           {/* fetch just the booking in LibCal corresponding to this month. */}
         <Calendar value={value}
             onSelect={this.onSelect}
+            locale={moment.locale('nl')}
             dateCellRender={(e) => this.dateCellRender(e)}
             />
       </div>

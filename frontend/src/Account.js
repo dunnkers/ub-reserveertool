@@ -87,7 +87,9 @@ export default class Account extends React.Component {
           <>
           <Modal title="Login" visible={this.state.loginVisible}
             onCancel={() => this.setState({ loginVisible: false })}
-            footer={[]}>
+            footer={[]}
+            // width={300}
+            >
             <Input prefix={<UserOutlined />} placeholder="RUG email"
               onPressEnter={(e) => this.login(e.target.value)}
               ref={loginValue}

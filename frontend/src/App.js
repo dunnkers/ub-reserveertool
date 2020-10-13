@@ -1,4 +1,4 @@
-import { message } from 'antd';
+import { message, Card } from 'antd';
 import 'antd/dist/antd.css';
 import $ from 'jquery';
 import React from 'react';
@@ -79,13 +79,14 @@ class App extends React.Component {
             style={{float:'right'}}
             />
         {/* <BookingPage
-          account={this.state.account}
+          results={this.state.results}
           email={this.state.email} /> */}
-        <div style={{display:'flex'}}>
+        <div className="reservationbox" 
+          style={{display:'flex'}}>
           <div style={{margin:'20px'}}>
             <h2>Make reservations</h2>
             {
-              this.state.results.map(result => {
+              this.state.results.length > 0 ? this.state.results.map(result => {
                 const booked = this.state.reservations.includes(String(result.id)) ||
                                this.state.triggers.includes(String(result.id));
                 if (booked) return <div key={result.id}></div>;
@@ -96,7 +97,7 @@ class App extends React.Component {
                                   planReservering={
                                     (result) => this.planReservering(result)
                                   }/>
-              })
+              }) : <Card loading={true} />
             }
           </div>
           <div style={{margin:'20px'}}>
