@@ -5,7 +5,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const cron = require('node-cron');
-const gszv = require('./gszvgolfbreker')
 
 const app = express();
 app.use(bodyParser.json()); 
