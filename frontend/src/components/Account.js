@@ -4,7 +4,9 @@ import { UserOutlined,
     LoginOutlined } from '@ant-design/icons';
 import { Button, Input, Menu, message, Form, Modal } from 'antd';
 import React, { createRef } from 'react';
-import { constructPostForm } from './util'; 
+import { constructPostForm } from '../util/util'; 
+import { BACKEND } from '../util/config';
+
 const { SubMenu } = Menu;
 
 export default class Account extends React.Component {
@@ -23,7 +25,7 @@ export default class Account extends React.Component {
     }
 
     identify(email) {
-        return fetch('http://35.228.177.55:3001/identify/', constructPostForm({email}))
+        return fetch(`${BACKEND}/identify`, constructPostForm({email}))
         .then(response => response.json())
         .then(result => {
             if (result) {
@@ -48,7 +50,7 @@ export default class Account extends React.Component {
 
     registerAccount(user) {
         this.setState({registerLoading: true})
-        return fetch('http://35.228.177.55:3001/register_account/', constructPostForm(user))
+        return fetch(`${BACKEND}/register_account`, constructPostForm(user))
         .then(response => response.json())
         .then(result => {
         this.setState({registerLoading:false, registerVisible: false });
@@ -92,6 +94,7 @@ export default class Account extends React.Component {
             >
             <Input prefix={<UserOutlined />} placeholder="RUG email"
               onPressEnter={(e) => this.login(e.target.value)}
+              autoFocus
               ref={loginValue}
               style={{width: 250}} />
             <Button type="primary" onClick={() => {

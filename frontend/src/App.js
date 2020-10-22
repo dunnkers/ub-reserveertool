@@ -3,10 +3,11 @@ import 'antd/dist/antd.css';
 import $ from 'jquery';
 import React from 'react';
 import './App.css';
-import StudySlot from './StudySlot';
-import Account from './Account';
-import BookingPage from './BookingPage';
-import { constructPostForm } from './util'; 
+import StudySlot from './components/StudySlot';
+import Account from './components/Account';
+// import BookingPage from './components/BookingPage';
+import { constructPostForm } from './util/util'; 
+import { BACKEND } from './util/config';
 
 class App extends React.Component {
   constructor(props) {
@@ -29,7 +30,7 @@ class App extends React.Component {
     const regmsg = event.registration_msg;
     const fully_booked = regmsg && regmsg.msg.includes('fully booked');
     const not_open = regmsg && regmsg.msg.includes('Registrations open at');
-    fetch('http://35.228.177.55:3001/register/', constructPostForm({
+    fetch(`${BACKEND}/register/`, constructPostForm({
       email: this.state.email,
       event_id,
       fully_booked,
@@ -45,7 +46,7 @@ class App extends React.Component {
   }
 
   setReservations = () => {
-    fetch('http://35.228.177.55:3001/reservations/', constructPostForm({
+    fetch(`${BACKEND}/reservations/`, constructPostForm({
         email: this.state.email
     }))
     .then(response => response.json())
@@ -58,7 +59,7 @@ class App extends React.Component {
 
   cancelReservation = event_id => {
     console.log(event_id); 
-    fetch('http://35.228.177.55:3001/cancel_reservation/', constructPostForm({
+    fetch(`${BACKEND}/cancel_reservation/`, constructPostForm({
         email: this.state.email,
         event_id
     }))

@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar, Badge } from 'antd';
 import moment from 'moment';
 import $ from 'jquery';
-import { constructPostForm } from './util'; 
+import { constructPostForm } from '../util/util'; 
 import 'moment/locale/nl';
 
 export default class BookingPage extends React.Component {
