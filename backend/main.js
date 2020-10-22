@@ -191,8 +191,9 @@ app.post('/register_account', (req, res) => {
     res.json({'message': 'Account created.'});
 })
 
-app.listen(3001, () =>
-    console.log(`Example app listening on port 3001!`),
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () =>
+    console.log(`Example app listening on port ${PORT}!`),
 );
 process.on("exit", function(){
     client.quit();
