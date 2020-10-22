@@ -14,8 +14,7 @@ export default class Account extends React.Component {
         super(props);
         this.state = {
           registerVisible: false,
-          loginVisible: false,
-          loginValue: ''
+          loginVisible: false
         };
     }
 
@@ -30,7 +29,8 @@ export default class Account extends React.Component {
         .then(result => {
             if (result) {
               const localst_email = localStorage.getItem('email');
-              if (!localst_email) message.success('Logged into '+email);
+              if (!localst_email) message.success('Logged in as '+result.fname
+                +' '+result.lname);
               localStorage.setItem('email', email);
               const accinfo = { account:result, email };
               this.setState(accinfo);
@@ -43,9 +43,9 @@ export default class Account extends React.Component {
     }
     
     login(email) {
-        return this.identify(email).then(() => this.setState({
-            loginVisible: false
-        }));
+      return this.identify(email).then(() => {
+        this.setState({ loginVisible: false });
+      });
     }
 
     registerAccount(user) {
@@ -65,6 +65,7 @@ export default class Account extends React.Component {
         case 'logout':
             localStorage.removeItem('email');
             this.setState({account:null})
+            this.props.loggedOut();
             message.success('Logged out');
             break;
         case 'login':
@@ -90,19 +91,16 @@ export default class Account extends React.Component {
           <Modal title="Login" visible={this.state.loginVisible}
             onCancel={() => this.setState({ loginVisible: false })}
             footer={[]}
-            // width={300}
             >
-            <Input prefix={<UserOutlined />} placeholder="RUG email"
-              onPressEnter={(e) => this.login(e.target.value)}
-              autoFocus
-              ref={loginValue}
-              style={{width: 250}} />
-            <Button type="primary" onClick={() => {
-              this.login(loginValue.current.input.value)
-            }
-              }>
-              Login
-            </Button>
+              <div style={{display:'flex'}}>
+                <Input prefix={<UserOutlined />} placeholder="RUG email"
+                  onPressEnter={(e) => this.login(e.target.value)}
+                  autoFocus
+                  ref={loginValue}/>
+                <Button type="primary" onClick={() => {
+                  this.login(loginValue.current.input.value)
+                }}>Login</Button>
+            </div>
           </Modal>
           <Modal title="Register" visible={this.state.registerVisible}
             onCancel={(e) => {
@@ -141,7 +139,12 @@ export default class Account extends React.Component {
               key="sub1"
               icon={<UserOutlined />}
               title={this.state.account ? 
-                `${this.state.account.fname} ${this.state.account.lname}` : ''}
+                <>
+                  <span className='account-fname'>{this.state.account.fname}</span>
+                  &nbsp;
+                  <span className='account-lname'>{this.state.account.lname}</span>
+                </>
+                 : ''}
               onClick={this.handleClick}>
               {this.state.account && 
                 <Menu.Item key="logout" icon={<LogoutOutlined />}>Logout</Menu.Item>}

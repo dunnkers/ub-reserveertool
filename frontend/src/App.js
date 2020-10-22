@@ -8,10 +8,13 @@ import Account from './components/Account';
 import { constructPostForm } from './util/util'; 
 import { BACKEND } from './util/config';
 
+const INIT_STATE = {results: []};
+const INIT_ACC_STATE = {reservations:[],triggers:[],filtered:false,
+  account: null};
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {results: [],reservations:[],triggers:[],filtered:false};
+    this.state = {...INIT_STATE, ...INIT_ACC_STATE};
   }
 
   componentDidMount() {
@@ -77,57 +80,56 @@ class App extends React.Component {
     return (
       <div className="App">
         <div className="logo">UB Reserveertool</div>
-          <Account 
-            setReservations={() => this.setReservations()}
-            setAccount={accinfo => this.setState(accinfo)}
-            style={{float:'right'}}
-            />
-        <div className="reservationbox">
-          <h2>Reservations</h2>
-          <Checkbox onChange={e => this.filter(e)}>
-            Show only my reservations
-          </Checkbox>
-          <div style={{margin:'30px',
-            display:'grid',
-            gridTemplateColumns: 'repeat(auto-fill,minmax(330px,1fr))',
-            gridGap: '40px'
-          }}>
-            {
-              this.state.results.length > 0 ? 
-                this.state.results.map(result => {
-                  const trigger = this.state.triggers.includes(String(result.id));
-                  const booked = this.state.reservations.includes(String(result.id)) ||
-                                  trigger;
-                  return {
-                    trigger,
-                    booked,
-                    ...result
-                  };
-                })
-                .filter(result => this.state.filtered ? result.booked : true)
-                .map(result => <StudySlot key={result.id}
-                                          slotinfo={result}
-                                          account={this.state.account}
-                                          booked={result.booked}
-                                          planReservering={
-                                            (result) => this.planReservering(result)
-                                          }
-                                          cancelReservering={
-                                            (result) => this.cancelReservation(result.id)
-                                          }
-                                          trigger={result.trigger}
-                                          />)
-               : <>
-                <Card loading={true} style={{ width: 320 }} />
-                <Card loading={true} style={{ width: 320 }} />
-                <Card loading={true} style={{ width: 320 }} />
-                <Card loading={true} style={{ width: 320 }} />
-                <Card loading={true} style={{ width: 320 }} />
-                <Card loading={true} style={{ width: 320 }} />
-                <Card loading={true} style={{ width: 320 }} />
-              </>
-            }
-          </div>
+        <Account 
+          setReservations={() => this.setReservations()}
+          setAccount={accinfo => this.setState(accinfo)}
+          style={{float:'right'}}
+          loggedOut={() => this.setState(INIT_ACC_STATE)}
+          />
+        <h2 style={{marginTop: '10px' }}>Reservations</h2>
+        <Checkbox onChange={e => this.filter(e)}>
+          Show only my reservations
+        </Checkbox>
+        <div style={{margin:'30px',
+          display:'grid',
+          gridTemplateColumns: 'repeat(auto-fill,minmax(330px,1fr))',
+          gridGap: '40px'
+        }}>
+          {
+            this.state.results.length > 0 ? 
+              this.state.results.map(result => {
+                const trigger = this.state.triggers.includes(String(result.id));
+                const booked = this.state.reservations.includes(String(result.id)) ||
+                                trigger;
+                return {
+                  trigger,
+                  booked,
+                  ...result
+                };
+              })
+              .filter(result => this.state.filtered ? result.booked : true)
+              .map(result => <StudySlot key={result.id}
+                                        slotinfo={result}
+                                        account={this.state.account}
+                                        booked={result.booked}
+                                        planReservering={
+                                          (result) => this.planReservering(result)
+                                        }
+                                        cancelReservering={
+                                          (result) => this.cancelReservation(result.id)
+                                        }
+                                        trigger={result.trigger}
+                                        />)
+              : <>
+              <Card loading={true} style={{ width: 320 }} />
+              <Card loading={true} style={{ width: 320 }} />
+              <Card loading={true} style={{ width: 320 }} />
+              <Card loading={true} style={{ width: 320 }} />
+              <Card loading={true} style={{ width: 320 }} />
+              <Card loading={true} style={{ width: 320 }} />
+              <Card loading={true} style={{ width: 320 }} />
+            </>
+          }
         </div>
       </div>
     );
