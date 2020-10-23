@@ -22,7 +22,6 @@ async function beginRegistration(event_id) {
 async function performRegistration(id, event_id, user) {
     return await post(`submit/${event_id}`, formurlencoded({
         id,
-        formData: {
             event_id,
             'cal_id': '7564',
             'wl': '0',
@@ -179,16 +178,15 @@ app.post('/identify', (req, res) => {
     });
 });
 
-app.post('/register_account', (req, res) => {
-    if (!req.body.formData) return res.status(500).send('No form data supplied');
-    if (!req.body.formData.fname) return res.status(500).send('No fname supplied');
-    if (!req.body.formData.lname) return res.status(500).send('No lname supplied');
-    if (!req.body.formData.email) return res.status(500).send('No email supplied');
-    if (!req.body.formData.phone) return res.status(500).send('No phone supplied');
-    if (!req.body.formData.q1) return res.status(500).send('No student no. supplied');
-    console.log('registering account' + req.body.formData.email);
-    client.HMSET(req.body.formData.email, req.body.formData);
-    res.json({'message': 'Account created.'});
+app.post('/update_account', (req, res) => {
+    if (!req.body.fname) return res.status(500).send('No fname supplied');
+    if (!req.body.lname) return res.status(500).send('No lname supplied');
+    if (!req.body.email) return res.status(500).send('No email supplied');
+    if (!req.body.phone) return res.status(500).send('No phone supplied');
+    if (!req.body.q1) return res.status(500).send('No student no. supplied');
+    console.log('updating account' + req.body.email);
+    client.HMSET(req.body.email, req.body);
+    res.json({'message': 'Account updated.'});
 })
 
 const PORT = process.env.PORT || 3001;
