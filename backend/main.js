@@ -154,7 +154,22 @@ function sanitizeReservations(email, startdts) {
     };
 }
 
+function sanitizeStartdts() {
+    client.hgetall('event_startdts', (err, startdts) => {
+        if (err) return console.warn('event_startdts retrieval err', err);
+        let cnt = 0;
+        Object.keys(startdts).forEach(event_id => {
+            const startdt = startdts[event_id];
+            if (new Date(startdt) < new Date()) {
+                client.HDEL('event_startdts', event_id);
+                cnt ++;
+            }
+        })
+        console.log(`Sanitized ${cnt} start dates.`)
+    });
+}
 
+/** Setup triggers **/
 servertime = new Date();
 localtime = new Date(new Date()
     .toLocaleString("nl-NL", { timeZone: "Europe/Amsterdam" }));
@@ -168,6 +183,10 @@ client.keys('*:triggers', (err, trigger_accounts) => {
     trigger_accounts.map(configureTriggers);
 });
 
+/** Sanitize startdts **/
+sanitizeStartdts();
+
+/** Express server **/
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () =>
     console.log(`Example app listening on port ${PORT}!`),
