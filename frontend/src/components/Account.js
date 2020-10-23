@@ -24,22 +24,23 @@ export default class Account extends React.Component {
     }
 
     identify(email) {
-        return fetch(`${BACKEND}/identify`, constructPostForm({email}))
-        .then(response => response.json())
-        .then(result => {
-            if (result) {
-              const localst_email = localStorage.getItem('email');
-              if (!localst_email) message.success('Logged in as '+result.fname
-                +' '+result.lname);
-              localStorage.setItem('email', email);
-              const accinfo = { account:result, email };
-              this.setState(accinfo);
-              this.props.setAccount(accinfo);
-            } else message.warn('Invalid login for '+email)
-            return result;
-        })
-        .catch (error => console.log('Request failed', error))
-        .then(() => this.props.setReservations());
+      email = email.toLowerCase();
+      return fetch(`${BACKEND}/identify`, constructPostForm({email}))
+      .then(response => response.json())
+      .then(result => {
+          if (result) {
+            const localst_email = localStorage.getItem('email');
+            if (!localst_email) message.success('Logged in as '+result.fname
+              +' '+result.lname);
+            localStorage.setItem('email', email);
+            const accinfo = { account:result, email };
+            this.setState(accinfo);
+            this.props.setAccount(accinfo);
+          } else message.warn('Invalid login for '+email)
+          return result;
+      })
+      .catch (error => console.log('Request failed', error))
+      .then(() => this.props.setReservations());
     }
     
     login(email) {
@@ -49,12 +50,14 @@ export default class Account extends React.Component {
     }
 
     registerAccount(user) {
-        this.setState({registerLoading: true})
-        return fetch(`${BACKEND}/register_account`, constructPostForm(user))
+      user['formData[email]'] = user['formData[email]'].toLowerCase();
+      this.setState({registerLoading: true});
+      
+      return fetch(`${BACKEND}/register_account`, constructPostForm(user))
         .then(response => response.json())
         .then(result => {
-        this.setState({registerLoading:false, registerVisible: false });
-        return this.identify(user['formData[email]']);
+          this.setState({registerLoading:false, registerVisible: false });
+          return this.identify(user['formData[email]']);
         })
         .catch (error => console.log('Request failed', error));   
     }
