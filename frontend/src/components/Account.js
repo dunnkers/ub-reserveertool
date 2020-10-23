@@ -13,7 +13,7 @@ export default class Account extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-          registerVisible: false,
+          updateVisible: false,
           loginVisible: false
         };
     }
@@ -49,15 +49,15 @@ export default class Account extends React.Component {
       });
     }
 
-    registerAccount(user) {
-      user['formData[email]'] = user['formData[email]'].toLowerCase();
-      this.setState({registerLoading: true});
-      
-      return fetch(`${BACKEND}/register_account`, constructPostForm(user))
+    updateAccount(user) {
+      user['email'] = user['email'].toLowerCase();
+      this.setState({updateLoading: true});
+
+      return fetch(`${BACKEND}/update_account`, constructPostForm(user))
         .then(response => response.json())
         .then(result => {
-          this.setState({registerLoading:false, registerVisible: false });
-          return this.identify(user['formData[email]']);
+          this.setState({updateLoading:false, updateVisible: false });
+          return this.identify(user['email']);
         })
         .catch (error => console.log('Request failed', error));   
     }
@@ -74,8 +74,8 @@ export default class Account extends React.Component {
         case 'login':
             this.setState({loginVisible: true})
             break;
-        case 'register_account':
-            this.setState({registerVisible: true})
+        case 'update_account':
+            this.setState({updateVisible: true});
             break;
         default:
             console.warn('no action');
@@ -105,32 +105,33 @@ export default class Account extends React.Component {
                 }}>Login</Button>
             </div>
           </Modal>
-          <Modal title="Register" visible={this.state.registerVisible}
+          <Modal title="Update account info" visible={this.state.updateVisible}
             onCancel={(e) => {
-              this.setState({ registerVisible: false })
+              this.setState({ updateVisible: false })
             }}
-            footer={[]} onOk={(user) => this.registerAccount(user)}>
+            footer={[]} onOk={(user) => this.updateAccount(user)}>
             <Form name="registration" onFinish={(user) => {
-              this.registerAccount(user)
-            }}>
-              <Form.Item name={['formData[fname]']} label="First Name" rules={[{ required: true }]}>
+              this.updateAccount(user)
+            }}
+              initialValues={this.state.account || {}}>
+              <Form.Item name={['fname']} label="First Name" rules={[{ required: true }]}>
+                <Input autoFocus />
+              </Form.Item>
+              <Form.Item name={['lname']} label="Last Name" rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
-              <Form.Item name={['formData[lname]']} label="Last Name" rules={[{ required: true }]}>
+              <Form.Item name={['email']} label="Email" rules={[{ type: 'email', required: true }]}>
                 <Input />
               </Form.Item>
-              <Form.Item name={['formData[email]']} label="Email" rules={[{ type: 'email', required: true }]}>
+              <Form.Item name={['phone']} label="Phone Number" rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
-              <Form.Item name={['formData[phone]']} label="Phone Number" rules={[{ required: true }]}>
-                <Input />
-              </Form.Item>
-              <Form.Item name={['formData[q1]']} label="S- or P-number" rules={[{ required: true }]}>
+              <Form.Item name={['q1']} label="S- or P-number" rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit" loading={
-                  this.state.registerLoading
+                  this.state.updateLoading
                 }>
                   Submit
                 </Button>
@@ -150,9 +151,9 @@ export default class Account extends React.Component {
                  : ''}
               onClick={this.handleClick}>
               {this.state.account && 
+                <Menu.Item key="update_account" icon={<UserAddOutlined />}>Edit info</Menu.Item>}
+              {this.state.account && 
                 <Menu.Item key="logout" icon={<LogoutOutlined />}>Logout</Menu.Item>}
-              {!this.state.account && 
-                <Menu.Item key="register_account" icon={<UserAddOutlined />}>Register</Menu.Item>}
               {!this.state.account && 
                 <Menu.Item key="login" icon={<LoginOutlined />}>Login</Menu.Item>}
             </SubMenu>

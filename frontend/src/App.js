@@ -79,15 +79,15 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        <div className="logo">UB Reserveertool</div>
+        <div className="logo"></div>
         <Account 
           setReservations={() => this.setReservations()}
           setAccount={accinfo => this.setState(accinfo)}
           style={{float:'right'}}
           loggedOut={() => this.setState(INIT_ACC_STATE)}
           />
-        <h2 style={{marginTop: '10px' }}>Reservations</h2>
-        <Checkbox onChange={e => this.filter(e)}>
+        {/* <h2 style={{marginTop: '10px' }}>Reservations</h2> */}
+        <Checkbox style={{marginTop:'10px'}} onChange={e => this.filter(e)}>
           Show only my reservations
         </Checkbox>
         <div style={{margin:'30px',
@@ -96,7 +96,7 @@ class App extends React.Component {
           gridGap: '40px'
         }}>
           {
-            this.state.results.length > 0 ? 
+            this.state.results.length > 0 && this.state.account ? 
               this.state.results.map(result => {
                 const trigger = this.state.triggers.includes(String(result.id));
                 const booked = this.state.reservations.includes(String(result.id)) ||
