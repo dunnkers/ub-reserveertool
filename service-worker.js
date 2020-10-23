@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/ub-reserveertool/precache-manifest.d6b570a84adef3138c508a74a7f2ac46.js"
+  "/ub-reserveertool/precache-manifest.bd58ddd3bc315173d5d2a6b6253d3f79.js"
 );
 
 self.addEventListener('message', (event) => {
