@@ -30,8 +30,8 @@ export default class Account extends React.Component {
       .then(result => {
           if (result) {
             const localst_email = localStorage.getItem('email');
-            if (!localst_email) message.success('Logged in as '+result.fname
-              +' '+result.lname);
+            const name = result.fname ? 'as '+result.fname+' '+result.lname :'';
+            if (!localst_email) message.success('Logged in' + name);
             localStorage.setItem('email', email);
             const accinfo = { account:result, email };
             this.setState(accinfo);
@@ -121,7 +121,7 @@ export default class Account extends React.Component {
                 <Input />
               </Form.Item>
               <Form.Item name={['email']} label="Email" rules={[{ type: 'email', required: true }]}>
-                <Input />
+                <Input disabled={true} />
               </Form.Item>
               <Form.Item name={['phone']} label="Phone Number" rules={[{ required: true }]}>
                 <Input />

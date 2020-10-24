@@ -12,6 +12,11 @@ export default class StudySlot extends React.Component {
   render() {
     const result = this.props.slotinfo;
     const account = this.props.account;
+    const accinfo = account.email && 
+                    account.fname && 
+                    account.lname && 
+                    account.q1 &&
+                    account.phone;
     const booked = this.props.booked;
     const trigger = this.props.trigger;
 
@@ -51,12 +56,17 @@ export default class StudySlot extends React.Component {
           border: booked ? '2px solid #c0ffa7' : '1px solid #f0f0f0'
         }}
         actions={[
-          <Tooltip title={booked ? 
+          <Tooltip title={
+            accinfo ? 
+            (booked ? 
               (trigger ? "Trigger set for " + triggerdate :
                 "You are booked in ✓") :
               (result.registration_enabled ?
                 "Book in now" :
-                (fully_booked ? "Full" : "Book in when reservations open"))}>
+                (fully_booked ? "Full" : "Book in when reservations open"))
+                
+                )
+              : 'Fill in account info first.'}>
             <Button
               type="default"
               icon={booked ? 
@@ -66,7 +76,7 @@ export default class StudySlot extends React.Component {
                 <EditOutlined key="edit" /> :
                 <BellOutlined key="schedule" />)}
               onClick={() => this.props.planReservering(result)}
-              disabled={!account || fully_booked || booked}
+              disabled={!account || fully_booked || booked || !accinfo}
               />
             </Tooltip>,
             <>{(trigger || booked) &&

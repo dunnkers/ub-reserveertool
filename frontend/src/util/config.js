@@ -1,1 +1,1 @@
-export const BACKEND = 'http://localhost:3001';
+export const BACKEND = 'https://studieplek-reserveren.herokuapp.com';
