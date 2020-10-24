@@ -25,9 +25,13 @@ class App extends React.Component {
     .done((data) => this.setState({...data }))
   }
 
+  dateToStr(date) {
+    return date.toDateString() + ', ' + date.toLocaleTimeString();
+  }
+
   planReservering = event => {
     const event_id = event.id;
-    console.log('reserveren', event_id);
+    console.log('reserveren, id=', event_id);
     const startdt = event.startdt;
     const regmsg = event.registration_msg;
     const fully_booked = regmsg && regmsg.msg.includes('fully booked');
@@ -39,10 +43,31 @@ class App extends React.Component {
       not_open,
       startdt
     }))
-    .then(response => response.json())
-    .catch (error => console.log('Request failed', error))
+    .then(response => {
+      if (!response.ok) throw response;
+      return response.json();
+    })
+    .then(res => {
+      const str = this.dateToStr(new Date(startdt))
+      if ('message' in res && res.message.includes('scheduled')) {
+        message.success('Scheduled '+str);
+      } else {
+        message.success('Reserved '+str);
+      }
+      return;
+    })
+    .catch (error => {
+      return error.json().then(errobj => {
+        console.warn('Request failed', errobj.err)
+        if (errobj.err.includes('fully booked')) {
+          message.error('Already fully booked 😕');
+        } else {
+          message.error(errobj.err);
+        }
+      })
+    })
+    // Finally (despite any errors)
     .then(_ => {
-      message.success('Made reservation for '+event_id);
       return this.setReservations();
     });
   }
@@ -59,7 +84,8 @@ class App extends React.Component {
     })
   }
 
-  cancelReservation = event_id => {
+  cancelReservation = event => {
+    const event_id = event.id;
     console.log(event_id); 
     fetch(`${BACKEND}/cancel_reservation/`, constructPostForm({
         email: this.state.email,
@@ -67,7 +93,9 @@ class App extends React.Component {
     }))
     .then(response => response.json())
     .then(() => {
-      message.success('Cancelled event '+event_id);
+      const startdt = event.startdt;
+      const str = this.dateToStr(new Date(startdt))
+      message.success('Cancelled '+str);
       this.setReservations()
     }).catch(() => message.warn('Could not cancel event '+event_id));
   }
@@ -118,7 +146,7 @@ class App extends React.Component {
                                           (result) => this.planReservering(result)
                                         }
                                         cancelReservering={
-                                          (result) => this.cancelReservation(result.id)
+                                          (result) => this.cancelReservation(result)
                                         }
                                         trigger={result.trigger}
                                         />)

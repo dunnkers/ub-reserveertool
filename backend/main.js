@@ -21,7 +21,7 @@ async function registration(event_id, email) {
         if ('fullRegistration' in res && res.fullRegistration) {
             return res;
         } else {
-            throw 'Not fully registered.'
+            throw 'Unknown registration error.'
         }
     })
     .then(res => {
@@ -51,16 +51,21 @@ app.post('/register', (req, res) => {
     
     const {fully_booked, not_open, startdt, event_id, email} = req.body;
     console.log('registering ' + email + ' for event ' + event_id);
-    if (fully_booked === 'true') return res.json({'message': 'Fully booked.'});
+    if (fully_booked === 'true') {
+        return res.status(500).json({
+            errortype: 'REG_FAIL',
+            err: 'Registrations were already fully booked.'
+        });
+    }
     if (not_open === 'true') {
         console.log('not yet open.');
         client.sadd(email+':triggers', event_id); // add trigger, for server restarts
         scheduleReservation(event_id, email, startdt);
-        res.json({'message': 'Scheduled registration!'});
+        res.json({'message': 'Registration scheduled!'});
     } else {
         console.log('already open.');
         registration(event_id, email).then(result => {
-            res.json(result);
+            res.json({'message': 'Registration made!', ...result});
         }).catch(err => {
             res.status(500).json({ errortype: 'REG_FAIL', err });
         })
