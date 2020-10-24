@@ -16,3 +16,11 @@ docker push dunnkers/ub-reserveertool:backend
 kubectl delete deployments/ub-backend
 kubectl apply -f gcp.yaml
 ```
+
+## Backend usage
+
+Test using curl as such:
+
+```shell
+curl localhost:3001/reservations -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "email=..."
+```

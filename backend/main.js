@@ -13,9 +13,20 @@ async function registration(event_id, email) {
             if (!user) reject('no account in db');
             resolve(user);
         });
-    }).then(user => {
-        client.sadd(email+':reservations', event_id);
+    })
+    .then(user => {
         return register(event_id, user);
+    })
+    .then(res => {
+        if ('fullRegistration' in res && res.fullRegistration) {
+            return res;
+        } else {
+            throw 'Not fully registered.'
+        }
+    })
+    .then(res => {
+        client.sadd(email+':reservations', event_id);
+        return res;
     });
 }
 
@@ -48,9 +59,11 @@ app.post('/register', (req, res) => {
         res.json({'message': 'Scheduled registration!'});
     } else {
         console.log('already open.');
-        registration(event_id, email).then(res => {
-            res.json({'message': 'Made registration.'});
-        }).catch(err => res.status(500).send(err))
+        registration(event_id, email).then(result => {
+            res.json(result);
+        }).catch(err => {
+            res.status(500).json({ errortype: 'REG_FAIL', err });
+        })
     }
 });
 
@@ -99,6 +112,13 @@ function scheduleReservation(event_id, email, startdt) {
     // node-cron dep tz-offset out of date so timezones not working correctly.
     date.setHours(date.getHours() + timediff);
     
+    // NODE >= 12 ONLY FOR SOME REASON
+    if (!date.getSeconds()) { // seconds are NaN
+        console.warn('skipping CRON for ', startdt, event_id, email,
+            '(invalid date)')
+        return;
+    }
+
     // compute cron date format
     const sec = date.getSeconds();
     const min = date.getMinutes();

@@ -87,9 +87,11 @@ class App extends React.Component {
           loggedOut={() => this.setState(INIT_ACC_STATE)}
           />
         {/* <h2 style={{marginTop: '10px' }}>Reservations</h2> */}
-        <Checkbox style={{marginTop:'10px'}} onChange={e => this.filter(e)}>
-          Show only my reservations
-        </Checkbox>
+        {this.state.account &&
+          <Checkbox style={{marginTop:'10px'}} onChange={e => this.filter(e)}>
+            Show only my reservations
+          </Checkbox>
+        }
         <div style={{margin:'30px',
           display:'grid',
           gridTemplateColumns: 'repeat(auto-fill,minmax(330px,1fr))',

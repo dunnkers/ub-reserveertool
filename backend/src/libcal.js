@@ -44,6 +44,9 @@ module.exports.register = async function register(event_id, user) {
         })
         .catch(err => {
             console.warn(err.message);
-            err.text().then(console.log).catch(console.warn);
-        });   
+            return err.text().then(text => {
+                console.warn(text);
+                throw text;
+            })
+        });
 };
