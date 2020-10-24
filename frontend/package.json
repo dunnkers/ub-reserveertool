@@ -20,7 +20,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "cd ../; git subtree push --prefix frontend/build 5apps master",
+    "predeploy_gh": "npm run build",
+    "deploy_gh": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"
