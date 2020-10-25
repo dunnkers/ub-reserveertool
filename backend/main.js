@@ -229,7 +229,7 @@ client.keys('*:triggers', (err, trigger_accounts) => {
 sanitizeStartdts();
 
 /** Regloop **/
-// regloop(client, registration);
+regloop(client, registration);
 
 /** Express server **/
 const PORT = process.env.PORT || 3001;

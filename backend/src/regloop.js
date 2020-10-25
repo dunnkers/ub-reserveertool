@@ -1,21 +1,3 @@
-
-
-// module.exports.tryreg = function tryreg(regevents, email, registration) {
-//     outer: for (let regevent of regevents) {
-//         for (let event of regevent.events) {
-//             if (regevent.got) continue outer;
-//             registration(event, email).then(res => {
-//                 console.log(new Date().toLocaleTimeString(),
-//                     ': registered for ', event);
-//                 regevent.got = true;
-//             }).catch((e) => console.warn(new Date().toLocaleTimeString(),
-//                 ': could not register ',
-//                 event, ' > ', e));
-//         }
-//     }
-
-// }
-
 module.exports.regloop = function regloop(client, registration, timeout=10000) {
     const remove_samedate_regloop = (email, a_startdt, regloop) => {
         client.hget('event_startdts', regloop, (err, b_startdt) => {
@@ -67,7 +49,6 @@ module.exports.regloop = function regloop(client, registration, timeout=10000) {
     }
 
     const timeoutfunc = () => {
-        console.log('Get all `*:regloops` keys. Looping regs...')
         client.keys('*:regloops', (err, regloop_accounts) => {
             if (err) return console.warn('Redis *:regloops lookup failed')
             regloop_accounts.map(mapRegloop);
