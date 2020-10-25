@@ -7,7 +7,6 @@ const cors = require('cors');
 const cron = require('node-cron');
 
 async function registration(event_id, email) {
-    console.log(`performing registration for user ${email}, event ${event_id}`)
     return new Promise((resolve, reject) => {
         client.hgetall(email, (err, user) => {
             if (!user) reject('no account in db');
@@ -65,8 +64,10 @@ app.post('/register', (req, res) => {
     } else {
         console.log('already open.');
         registration(event_id, email).then(result => {
+            console.log('registration successful: ', result);
             res.json({'message': 'Registration made!', ...result});
         }).catch(err => {
+            console.warn(err);
             res.status(500).json({ errortype: 'REG_FAIL', err });
         })
     }
@@ -138,8 +139,12 @@ function scheduleReservation(event_id, email, startdt) {
     cron.schedule(`${sec} ${min} ${hr} ${day} ${month} *`, () => {
         console.log('trigger triggered:',event_id,email,', start date =',
             new Date(startdt));
-        registration(event_id, email);
-        client.srem(email+':triggers', event_id);
+        registration(event_id, email).then(result => {
+            console.log('trigger succeeded ', result)
+            client.srem(email+':triggers', event_id);
+        }).catch(err => {
+            console.warn('trigger reservation failed ', err);
+        });
     });
 }
 

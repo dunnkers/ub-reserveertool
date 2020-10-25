@@ -30,22 +30,13 @@ async function performRegistration(id, event_id, user) {
 module.exports.register = async function register(event_id, user) {
     return beginRegistration(event_id)
         .then(res => {
-            console.log(res);
-            console.log(res.id);
-            return res.id;
-        }).catch(console.warn)
-        .then(seat_id => {
-            return performRegistration(seat_id, event_id, user);
+            console.log('Reserved a seat.', res)
+            return res.id; // seat. { id: 'rjkeSd', seats: 120, seatsTaken: 119 }
         })
-        .then(res => {
-            console.log(res);
-            console.log(res.bookingId);
-            return res;
-        })
+        .then(seat_id => performRegistration(seat_id, event_id, user))
+        // returns booking. e.g. { fullRegistration: x, bookingId: y, totalCost: 0}
         .catch(err => {
-            console.warn(err.message);
             return err.text().then(text => {
-                console.warn(text);
                 throw text;
             })
         });
