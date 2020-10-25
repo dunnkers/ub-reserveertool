@@ -1,5 +1,6 @@
 const { register } = require('./src/libcal');
 const client = require('./src/redis-instance');
+const { regloop, tryreg } = require('./src/regloop');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -49,6 +50,7 @@ app.post('/register', (req, res) => {
     if (!req.body.event_id) return res.status(500).send('No event id supplied')
     
     const {fully_booked, not_open, startdt, event_id, email} = req.body;
+    client.HMSET('event_startdts', { [event_id]: startdt });
     console.log('registering ' + email + ' for event ' + event_id);
     if (fully_booked === 'true') {
         return res.status(500).json({
@@ -109,6 +111,17 @@ app.post('/update_account', (req, res) => {
     res.json({'message': 'Account updated.'});
 })
 
+app.post('/regloop', (req, res) => {
+    if (!req.body.email) return res.status(500).send('No email supplied')
+    if (!req.body.event_id) return res.status(500).send('No event id supplied')
+    if (!req.body.startdt) return res.status(500).send('No startdt supplied')
+    const {event_id, email, startdt} = req.body;
+    console.log('setting regloop for ', email, event_id, startdt)
+    client.HMSET('event_startdts', { [event_id]: startdt });
+    client.sadd(email+':regloops', event_id);
+    res.json({'message': 'Regloop set.'});
+})
+
 function scheduleReservation(event_id, email, startdt) {
     // 4 days in advance
     let date = new Date(startdt);
@@ -135,7 +148,6 @@ function scheduleReservation(event_id, email, startdt) {
     // set CRON
     console.log(`Setting CRON: ${sec} ${min} ${hr} ${day} ${month} *`,
         `(date=${date}, event=${event_id}, email=${email})`);
-    client.HMSET('event_startdts', { [event_id]: startdt });
     cron.schedule(`${sec} ${min} ${hr} ${day} ${month} *`, () => {
         console.log('trigger triggered:',event_id,email,', start date =',
             new Date(startdt));
@@ -215,6 +227,9 @@ client.keys('*:triggers', (err, trigger_accounts) => {
 
 /** Sanitize startdts **/
 sanitizeStartdts();
+
+/** Regloop **/
+// regloop(client, registration);
 
 /** Express server **/
 const PORT = process.env.PORT || 3001;

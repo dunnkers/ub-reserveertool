@@ -36,6 +36,7 @@ module.exports.register = async function register(event_id, user) {
         .then(seat_id => performRegistration(seat_id, event_id, user))
         // returns booking. e.g. { fullRegistration: x, bookingId: y, totalCost: 0}
         .catch(err => {
+            if (!err.text) throw err;
             return err.text().then(text => {
                 throw text;
             })
