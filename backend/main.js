@@ -122,6 +122,13 @@ app.post('/regloop', (req, res) => {
     res.json({'message': 'Regloop set.'});
 })
 
+app.post('/add_account', (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(500).send('No email supplied');
+    client.HMSET(email, { email: email });
+    res.json({'message': 'Added account.'});
+})
+
 function scheduleReservation(event_id, email, startdt) {
     // 4 days in advance
     let date = new Date(startdt);
