@@ -26,10 +26,15 @@ curl localhost:3001/reservations -H "Content-Type: application/x-www-form-urlenc
 ```
 
 ```
-curl https://studieplek-reserveren.herokuapp.com/ -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "event_id=...&email=...&startdt=..."
+curl https://studieplek-reserveren.herokuapp.com/regloop -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "event_id=...&email=...&startdt=..."
 ```
 
 Cancelling events
 ```shell
 curl https://libcal.rug.nl/ajax/event/cancel/2364883\?w\=0\&c\=7cd9e94a3421f8ab305f794ecff0c0c1\&rm\=0 -X POST -H "Referer: https://libcal.rug.nl/event/cancel/2364883?c=7cd9e94a3421f8ab305f794ecff0c0c1"
+```
+
+Register account
+```shell
+curl https://studieplek-reserveren.herokuapp.com/add_account -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "email=..."
 ```

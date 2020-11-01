@@ -14,7 +14,9 @@ export default class Account extends React.Component {
         super(props);
         this.state = {
           updateVisible: false,
-          loginVisible: false
+          loginVisible: false,
+          registrationForm: createRef(),
+          loginValue: createRef()
         };
     }
 
@@ -30,12 +32,16 @@ export default class Account extends React.Component {
       .then(result => {
           if (result) {
             const localst_email = localStorage.getItem('email');
-            const name = result.fname ? 'as '+result.fname+' '+result.lname :'';
+            const name = result.fname ? ' as '+result.fname+' '+result.lname :'';
             if (!localst_email) message.success('Logged in' + name);
             localStorage.setItem('email', email);
             const accinfo = { account:result, email };
             this.setState(accinfo);
             this.props.setAccount(accinfo);
+            if (this.state.loginValue.current) {
+              this.state.loginValue.current.setValue('');
+              this.state.registrationForm.current.setFieldsValue(result);
+            }
           } else message.warn('Invalid login for '+email)
           return result;
       })
@@ -70,9 +76,21 @@ export default class Account extends React.Component {
             this.setState({account:null})
             this.props.loggedOut();
             message.success('Logged out');
+            if (this.state.registrationForm.current) {
+              // `registrationForm` had this users' initialValues put in,
+              // so we cannot reset to the intial values, but have to set
+              // every field explicitly to undefined instead.
+              this.state.registrationForm.current.setFieldsValue({
+                fname: undefined,
+                lname: undefined,
+                email: undefined,
+                phone: undefined,
+                q1: undefined
+              });
+            }
             break;
         case 'login':
-            this.setState({loginVisible: true})
+            this.setState({loginVisible: true});
             break;
         case 'update_account':
             this.setState({updateVisible: true});
@@ -88,7 +106,6 @@ export default class Account extends React.Component {
     }
 
     render() {
-      let loginValue = createRef();
         return (
           <>
           <Modal title="Login" visible={this.state.loginVisible}
@@ -99,9 +116,9 @@ export default class Account extends React.Component {
                 <Input prefix={<UserOutlined />} placeholder="RUG email"
                   onPressEnter={(e) => this.login(e.target.value)}
                   autoFocus
-                  ref={loginValue}/>
+                  ref={this.state.loginValue}/>
                 <Button type="primary" onClick={() => {
-                  this.login(loginValue.current.input.value)
+                  this.login(this.state.loginValue.current.input.value)
                 }}>Login</Button>
             </div>
           </Modal>
@@ -113,6 +130,7 @@ export default class Account extends React.Component {
             <Form name="registration" onFinish={(user) => {
               this.updateAccount(user)
             }}
+              ref={this.state.registrationForm}
               initialValues={this.state.account || {}}>
               <Form.Item name={['fname']} label="First Name" rules={[{ required: true }]}>
                 <Input autoFocus />
