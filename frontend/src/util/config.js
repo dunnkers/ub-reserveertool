@@ -1,0 +1,1 @@
+export const BACKEND = 'https://studieplek-reserveren.herokuapp.com';
