@@ -38,3 +38,15 @@ Register account
 ```shell
 curl https://studieplek-reserveren.herokuapp.com/add_account -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "email=..."
 ```
+
+### Redis cluster
+
+```
+helm install my-redis --set password=... bitnami/redis
+
+```
+
+### Redis commander
+```
+code /usr/local/lib/node_modules/redis-commander/config/local-development.json
+```
