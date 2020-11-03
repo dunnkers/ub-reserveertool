@@ -39,14 +39,26 @@ Register account
 curl https://studieplek-reserveren.herokuapp.com/add_account -H "Content-Type: application/x-www-form-urlencoded" -X POST -d "email=..."
 ```
 
-### Redis cluster
+### Redis cluster on Kubernetes
 
 ```
-helm install my-redis --set password=... bitnami/redis
+helm install my-redis bitnami/redis --set cluster.enabled=false --set master.persistence.size=1Gi
+```
 
+Get redis password
+```
+export REDIS_PASSWORD=$(kubectl get secret --namespace default my-redis -o jsonpath="{.data.redis-password}" | base64 --decode)
+echo $REDIS_PASSWORD
 ```
 
 ### Redis commander
 ```
 code /usr/local/lib/node_modules/redis-commander/config/local-development.json
 ```
+
+Usage
+```
+redis-commander
+```
+
+> add more connections to have them also show up in the interface.
