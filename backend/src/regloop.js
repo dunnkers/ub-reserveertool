@@ -37,6 +37,7 @@ module.exports.regloop = function regloop(client, registration, timeout=10000) {
         const email = regloop_account.split(':')[0];
         client.smembers(regloop_account, (err, regloops) => {
             if (err) return console.warn('`smembers` failed for '+regloop_account)
+            if (!regloops) return
             regloops.forEach(regloop => {
                 setregloop(email, regloop).then(startdt => {
                     // regloop succeeded, remove all same-date regloops
@@ -51,6 +52,7 @@ module.exports.regloop = function regloop(client, registration, timeout=10000) {
     const timeoutfunc = () => {
         client.keys('*:regloops', (err, regloop_accounts) => {
             if (err) return console.warn('Redis *:regloops lookup failed')
+            if (!regloop_accounts) return
             regloop_accounts.map(mapRegloop);
         });
 

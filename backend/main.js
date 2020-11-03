@@ -187,6 +187,7 @@ function configureTriggers(trigger_account) {
     const email = trigger_account.split(':')[0];
     client.smembers(trigger_account, (err, triggers) => {
         if (err) return console.warn('`smembers` failed for '+trigger_account)
+        if (!triggers) return
         triggers.map(setTrigger(email));
     });
 }
@@ -206,6 +207,7 @@ function sanitizeReservations(email, startdts) {
 function sanitizeStartdts() {
     client.hgetall('event_startdts', (err, startdts) => {
         if (err) return console.warn('event_startdts retrieval err', err);
+        if (!startdts) return console.warn('event_startdts retrieval err', startdts);
         let cnt = 0;
         Object.keys(startdts).forEach(event_id => {
             const startdt = startdts[event_id];
