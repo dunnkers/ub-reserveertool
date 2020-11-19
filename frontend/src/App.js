@@ -18,6 +18,55 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    // const formdata = constructPostForm({
+    //   lid: 1443,
+    //   gid: 3634,
+    //   eid: -1,
+    //   seat: 1,
+    //   seatId: 0,
+    //   zone: 0,
+    //   accessible: 0,
+    //   powered: 0,
+    //   start: '2020-11-22',
+    //   end: '2020-11-23',
+    //   pageIndex: 0,
+    //   pageSize: 18,
+    // });
+
+    // // https://www.trustedsec.com/blog/setting-the-referer-header-using-javascript/
+    // const savedPath = window.location.pathname;
+    // const savedSearch = window.location.search;
+    // window.history.replaceState(null, '', 'https://libcal.rug.nl/spaces?lid=1443');
+    // fetch(`https://libcal.rug.nl/spaces/availability/grid`, {
+    //   ...formdata,
+    //   headers: {
+    //     'accept': 'application/json, text/javascript, */*; q=0.01',
+    //     'accept-encoding': 'gzip, deflate, br',
+    //     'accept-language': 'en-US,en;q=0.9',
+    //     'content-length': '126',
+    //     'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    //     'dnt': '1',
+    //     'sec-fetch-dest': 'empty',
+    //     'sec-fetch-mode': 'cors',
+    //     'sec-fetch-site': 'same-origin',
+    //     'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36',
+    //     'x-requested-with': 'XMLHttpRequest',
+    //   },
+    //   mode: 'no-cors',
+    //   // origin: 'https://libcal.rug.nl',
+    //   // referrer: 'https://libcal.rug.nl/spaces?lid=1443',
+    //   referrerPolicy: "no-referrer"  
+    // })
+    // .then(response => {
+    //   if (!response.ok) throw response;
+    //   console.log(response.json());
+    //   window.history.replaceState(null, '', savedPath+savedSearch);
+    // })
+    // .catch(err => {
+    //   console.warn(err);
+    //   window.history.replaceState(null, '', savedPath+savedSearch);
+    // });
+
     $.ajax({
       url: 'https://libcal.rug.nl/ajax/calendar/list?c=7564&date=0000-00-00&perpage=96&page=1&audience=undefined&cats=&camps=&inc=0',
       dataType: 'jsonp'
