@@ -243,7 +243,7 @@ regloop(client, registration);
 /** Express server **/
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () =>
-    console.log(`Example app listening on port ${PORT}!`),
+    console.log(`Example app listening on port ${PORT}!`)
 );
 process.on("exit", function(){
     client.quit();
