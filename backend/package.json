@@ -9,13 +9,14 @@
     "node-cron": "^2.0.3",
     "puppeteer": "^5.3.0",
     "redis": "^3.0.2",
-    "tz-offset": "^0.0.2"
+    "tz-offset": "^0.0.2",
+    "http-proxy": "^1.18.1"
   },
   "devDependencies": {
     "redis-commander": "0.7.0"
   },
   "scripts": {
-    "start": "node main.js",
+    "start": "node forward.js",
     "redisgui": "redis-commander --redis-host $REDIS_IP --redis-password $REDIS_ROOT_PASSWORD"
   },
   "license": "MIT",

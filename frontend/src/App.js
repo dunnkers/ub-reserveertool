@@ -200,6 +200,7 @@ class App extends React.Component {
                                         trigger={result.trigger}
                                         />)
               : <>
+              Loading may take up to around 15 seconds...
               <Card loading={true} style={{ width: 320 }} />
               <Card loading={true} style={{ width: 320 }} />
               <Card loading={true} style={{ width: 320 }} />
