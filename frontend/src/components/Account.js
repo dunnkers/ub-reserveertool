@@ -50,9 +50,21 @@ export default class Account extends React.Component {
     }
     
     login(email) {
-      return this.identify(email).then(() => {
-        this.setState({ loginVisible: false });
-      });
+      if (email.startsWith('add_account:')) {
+        email = email.replace('add_account:', '');
+        console.log(`adding ${email} account...`);
+        return fetch(`${BACKEND}/add_account`, constructPostForm({email}))
+          .then(response => {
+            console.log('account added:', response);
+            return this.identify(email).then(() => {
+              this.setState({ loginVisible: false });
+            });
+          });
+      } else {
+        return this.identify(email).then(() => {
+          this.setState({ loginVisible: false });
+        });
+      }
     }
 
     updateAccount(user) {
