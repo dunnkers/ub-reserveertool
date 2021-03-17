@@ -12,7 +12,8 @@ export default class StudySlot extends React.Component {
   render() {
     const result = this.props.slotinfo;
     const account = this.props.account;
-    const accinfo = account.email && 
+    const accinfo = account &&
+                    account.email && 
                     account.fname && 
                     account.lname && 
                     account.q1 &&
@@ -57,16 +58,22 @@ export default class StudySlot extends React.Component {
         }}
         actions={[
           <Tooltip title={
-            accinfo ? 
-            (booked ? 
-              (trigger ? "Trigger set for " + triggerdate :
-                "You are booked in ✓") :
-              (result.registration_enabled ?
-                "Book in now" :
-                (fully_booked ? "Full" : "Book in when reservations open"))
-                
-                )
-              : 'Fill in account info first.'}>
+            account ? (
+              accinfo ? (
+                booked ? (
+                  trigger ? (
+                    "Trigger set for " + triggerdate
+                    ) : "You are booked in ✓"
+                  )
+                  : (
+                    result.registration_enabled ? "Book in now" : (
+                      fully_booked ? "Full" : "Book in when reservations open"
+                      )
+                    )   
+              )
+              : 'Fill in account info first.'
+            ) : 'Login first'
+            }>
             <Button
               type="default"
               icon={booked ? 

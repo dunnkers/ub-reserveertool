@@ -175,7 +175,7 @@ class App extends React.Component {
           gridGap: '40px'
         }}>
           {
-            this.state.results.length > 0 && this.state.account ? 
+            this.state.results.length > 0 ? 
               this.state.results.map(result => {
                 const trigger = this.state.triggers.includes(String(result.id));
                 const booked = this.state.reservations.includes(String(result.id)) ||
@@ -200,7 +200,6 @@ class App extends React.Component {
                                         trigger={result.trigger}
                                         />)
               : <>
-              Loading may take up to around 15 seconds...
               <Card loading={true} style={{ width: 320 }} />
               <Card loading={true} style={{ width: 320 }} />
               <Card loading={true} style={{ width: 320 }} />
