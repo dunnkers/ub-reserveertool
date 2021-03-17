@@ -31,9 +31,9 @@ export default class Account extends React.Component {
     identify(email) {
       email = email.toLowerCase();
       this.setState({ identifying: true });
-      return new Promise(resolve => {
-        setTimeout(resolve, 5000);
-      }).then(() => {
+      // return new Promise(resolve => {
+      //   setTimeout(resolve, 5000);
+      // }).then(() => {
 
       return fetch(`${BACKEND}/identify`, constructPostForm({email}))
       .then(response => response.json())
@@ -58,7 +58,7 @@ export default class Account extends React.Component {
         this.setState({ identifying: false });
         this.props.setReservations();
       });
-    });
+    // });
     }
     
     login(email) {
