@@ -16,6 +16,9 @@
   float: left;
   color: white;
   font-size: 17px;
+
+  z-index: 5000;
+  position: relative;
 }
 
 /* BookingPage */

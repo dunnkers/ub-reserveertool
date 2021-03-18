@@ -14,7 +14,12 @@ const INIT_ACC_STATE = {reservations:[],triggers:[],filtered:false,
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {...INIT_STATE, ...INIT_ACC_STATE};
+    this.state = {
+      ...INIT_STATE,
+      ...INIT_ACC_STATE, 
+      libcal: {},
+      force: false
+    };
   }
 
   componentDidMount() {
@@ -66,12 +71,24 @@ class App extends React.Component {
     //   console.warn(err);
     //   window.history.replaceState(null, '', savedPath+savedSearch);
     // });
+    let libcal = {};
+    if (window.location.pathname === '/glazengebouwtje') {
+      libcal['cal_id'] = '7736';
+      libcal['fid']    = '5517';
+      libcal['domain'] = 'libcal-gmw.rug.nl';
+    } else { // UB
+      libcal['cal_id'] = '7564';
+      libcal['fid']    = '5455';
+      libcal['domain'] = 'libcal.rug.nl';
+    }
+    const force = window.location.search.substr(1) === 'force';
 
     $.ajax({
-      url: 'https://libcal.rug.nl/ajax/calendar/list?c=7564&date=0000-00-00&perpage=96&page=1&audience=undefined&cats=&camps=&inc=0',
+      url: `https://${libcal['domain']}/ajax/calendar/list?c=${libcal['cal_id']}&date=0000-00-00&perpage=96&page=1&audience=undefined&cats=&camps=&inc=0`,
+      // https://libcal-gmw.rug.nl/ajax/calendar/list?c=7736&date=0000-00-00&perpage=48&page=1&audience=undefined&cats=&camps=undefined&inc=0&callback=s_lc_calendar_card
       dataType: 'jsonp'
     })
-    .done((data) => this.setState({...data }))
+    .done((data) => this.setState({...data, libcal, force }))
   }
 
   dateToStr(date) {
@@ -90,7 +107,9 @@ class App extends React.Component {
       event_id,
       fully_booked,
       not_open,
-      startdt
+      startdt,
+      force: this.state.force,
+      ...this.state.libcal
     }))
     .then(response => {
       if (!response.ok) throw response;
@@ -106,9 +125,11 @@ class App extends React.Component {
       return;
     })
     .catch (error => {
+      if (!error.json) return message.error('Server down.');
       return error.json().then(errobj => {
+        if (!errobj.err) return console.warn('We messed up. oops.', errobj);
         console.warn('Request failed', errobj.err)
-        if (errobj.err.includes('fully booked')) {
+        if (errobj.err.includes && errobj.err.includes('fully booked')) {
           message.error('Already fully booked 😕');
         } else {
           message.error(errobj.err);
@@ -156,7 +177,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        <div className="logo"></div>
+        <div className="logo">{this.state.force && "Force mode"}</div>
         <Account 
           setReservations={() => this.setReservations()}
           setAccount={accinfo => this.setState(accinfo)}
@@ -191,6 +212,7 @@ class App extends React.Component {
                                         slotinfo={result}
                                         account={this.state.account}
                                         booked={result.booked}
+                                        force={this.state.force}
                                         planReservering={
                                           (result) => this.planReservering(result)
                                         }

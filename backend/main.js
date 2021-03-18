@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const cron = require('node-cron');
 
-async function registration(event_id, email) {
+async function registration(event_id, email, libcal) {
     return new Promise((resolve, reject) => {
         client.hgetall(email, (err, user) => {
             if (!user) reject('no account in db');
@@ -15,7 +15,7 @@ async function registration(event_id, email) {
         });
     })
     .then(user => {
-        return register(event_id, user);
+        return register(event_id, user, libcal);
     })
     .then(res => {
         if ('fullRegistration' in res && res.fullRegistration) {
@@ -58,19 +58,34 @@ app.post('/register', (req, res) => {
             err: 'Registrations were already fully booked.'
         });
     }
-    if (not_open === 'true') {
+    let libcal;
+    if (req.body.cal_id && req.body.fid && req.body.domain) {
+        libcal = {
+            cal_id: req.body.cal_id,
+            fid: req.body.fid,
+            domain: req.body.domain
+        };
+        // [TODO]: heymans-compat - save libcal object to Redis.
+    }
+    const force = !!req.body.force;
+    if (force) console.log('Using FORCE to register.');
+    if (not_open === 'true' && !force) {
         console.log('not yet open.');
         client.sadd(email+':triggers', event_id); // add trigger, for server restarts
         scheduleReservation(event_id, email, startdt);
         res.json({'message': 'Registration scheduled!'});
+        // [TODO]: heymans-compat - add 'cal_id:trigggers' mapping.
     } else {
-        console.log('already open.');
-        registration(event_id, email).then(result => {
+        console.log('already open. libcal=', libcal);
+        registration(event_id, email, libcal).then(result => {
             console.log('registration successful: ', result);
             res.json({'message': 'Registration made!', ...result});
         }).catch(err => {
             console.warn(err);
-            res.status(500).json({ errortype: 'REG_FAIL', err });
+            res.status(500).json({
+                errortype: 'REG_FAIL',
+                err: err.message ? err.message : err
+            });
         })
     }
 });

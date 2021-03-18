@@ -20,6 +20,7 @@ export default class StudySlot extends React.Component {
                     account.phone;
     const booked = this.props.booked;
     const trigger = this.props.trigger;
+    const force = this.props.force;
 
     const regmsg = result.registration_msg;
     const fully_booked = regmsg && regmsg.msg.includes('fully booked');
@@ -66,7 +67,7 @@ export default class StudySlot extends React.Component {
                     ) : "You are booked in ✓"
                   )
                   : (
-                    result.registration_enabled ? "Book in now" : (
+                    force || result.registration_enabled ? "Book in now" : (
                       fully_booked ? "Full" : "Book in when reservations open"
                       )
                     )   
@@ -77,13 +78,14 @@ export default class StudySlot extends React.Component {
             <Button
               type="default"
               icon={booked ? 
-                (trigger ? <BellOutlined key="trigger" /> :
-                  <CheckOutlined key="booked" />) :
-                (result.registration_enabled ?
+                    (trigger ? <BellOutlined key="trigger" /> :
+                      <CheckOutlined key="booked" />)
+                  :
+                (force || result.registration_enabled ?
                 <EditOutlined key="edit" /> :
                 <BellOutlined key="schedule" />)}
               onClick={() => this.props.planReservering(result)}
-              disabled={!account || fully_booked || booked || !accinfo}
+              disabled={!force && (!account || fully_booked || booked || !accinfo)}
               />
             </Tooltip>,
             <>{(trigger || booked) &&
