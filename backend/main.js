@@ -67,7 +67,8 @@ app.post('/register', (req, res) => {
         };
         // [TODO]: heymans-compat - save libcal object to Redis.
     }
-    const force = !!req.body.force;
+    const force = req.body.force && req.body.force === true;
+    console.log('req.body.force', req.body.force);
     if (force) console.log('Using FORCE to register.');
     if (not_open === 'true' && !force) {
         console.log('not yet open.');

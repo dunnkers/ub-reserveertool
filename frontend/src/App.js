@@ -81,7 +81,7 @@ class App extends React.Component {
       libcal['fid']    = '5455';
       libcal['domain'] = 'libcal.rug.nl';
     }
-    const force = window.location.search.substr(1) === 'force';
+    const force = !!(window.location.search.substr(1) === 'force');
 
     $.ajax({
       url: `https://${libcal['domain']}/ajax/calendar/list?c=${libcal['cal_id']}&date=0000-00-00&perpage=96&page=1&audience=undefined&cats=&camps=&inc=0`,
