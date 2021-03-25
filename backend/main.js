@@ -7,6 +7,40 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const cron = require('node-cron');
 
+
+const LIBCAL = {
+    '7736': { //Heymans
+        'cal_id': '7736',
+        'fid': '5517',
+        'domain': 'libcal-gmw.rug.nl',
+    },
+    '7564': { //UB
+        'cal_id': '7564',
+        'fid': '5455',
+        'domain': 'libcal.rug.nl',
+    },
+    '7814': { //Harmonie ARTS
+        'cal_id': '7814',
+        'fid': '5569',
+        'domain': 'libcal-arts.rug.nl'
+    },
+    '7666': { //Harmonie JUR
+        'cal_id': '7666',
+        'fid': '5503',
+        'domain': 'libcal-jur.rug.nl'
+    },
+    '7836': { //Oude Boteringe 18
+        'cal_id': '7836',
+        'fid': '5503',
+        'domain': 'libcal-jur.rug.nl'
+    },
+    '7770': { //Duisenberg
+        'cal_id': '7770',
+        'fid': '5558',
+        'domain': 'libcal-feb.rug.nl'
+    }
+};
+
 async function registration(event_id, email, libcal) {
     return new Promise((resolve, reject) => {
         client.hgetall(email, (err, user) => {
@@ -58,7 +92,7 @@ app.post('/register', (req, res) => {
             err: 'Registrations were already fully booked.'
         });
     }
-    let libcal;
+    let libcal = LIBCAL['7564']; // UB
     if (req.body.cal_id && req.body.fid && req.body.domain) {
         libcal = {
             cal_id: req.body.cal_id,
@@ -67,13 +101,16 @@ app.post('/register', (req, res) => {
         };
         // [TODO]: heymans-compat - save libcal object to Redis.
     }
+    const cal_id = libcal['cal_id'];
+    client.HMSET('event_calids', { [event_id]: cal_id });
+
     const force = req.body.force && req.body.force === 'true';
     console.log('req.body.force', req.body.force);
     if (force) console.log('Using FORCE to register.');
     if (not_open === 'true' && !force) {
         console.log('not yet open.');
         client.sadd(email+':triggers', event_id); // add trigger, for server restarts
-        scheduleReservation(event_id, email, startdt);
+        scheduleReservation(event_id, email, startdt, cal_id);
         res.json({'message': 'Registration scheduled!'});
         // [TODO]: heymans-compat - add 'cal_id:trigggers' mapping.
     } else {
@@ -145,7 +182,7 @@ app.post('/add_account', (req, res) => {
     res.json({'message': 'Added account.'});
 })
 
-function scheduleReservation(event_id, email, startdt) {
+function scheduleReservation(event_id, email, startdt, cal_id) {
     // 4 days in advance
     let date = new Date(startdt);
     date.setDate(date.getDate() - 4);
@@ -174,7 +211,7 @@ function scheduleReservation(event_id, email, startdt) {
     cron.schedule(`${sec} ${min} ${hr} ${day} ${month} *`, () => {
         console.log('trigger triggered:',event_id,email,', start date =',
             new Date(startdt));
-        registration(event_id, email).then(result => {
+        registration(event_id, email, LIBCAL[cal_id]).then(result => {
             console.log('trigger succeeded ', result)
             client.srem(email+':triggers', event_id);
         }).catch(err => {
@@ -193,8 +230,13 @@ function setTrigger(email) {
             const today = new Date().setDate(new Date().getDate()+4);
             const outdated_trigger = new Date(startdt) < today;
             if (outdated_trigger) return client.srem(email+':triggers', trigger)
+            
+            client.hget('event_calids',trigger, (err, cal_id) => {
+                if (err) return console.warn('Error in event_calids lookup.', err)
+                if (!cal_id) return console.warn('No cal_id found!')
 
-            scheduleReservation(trigger, email, startdt);
+                scheduleReservation(trigger, email, startdt, cal_id);
+            });
         });
     }
 }
