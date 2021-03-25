@@ -230,7 +230,7 @@ class App extends React.Component {
 
   changeLibcal(name) {
     if (!LIBCAL.hasOwnProperty(name)) return console.warn('incorrect select');
-    message.success(`${name}`)
+    // message.success(`${name}`)
     this.setLibcal(LIBCAL[name]);
   }
 
@@ -250,7 +250,8 @@ class App extends React.Component {
             Show only my reservations
           </Checkbox>
         }
-        <Select defaultValue='UB' style={{ width: 120 }} onChange={e => this.changeLibcal(e)}>
+        <Select defaultValue='UB' style={{ width: 120 }} onChange={e => this.changeLibcal(e)}
+          style={{width:150}}>
           {Object.entries(LIBCAL).map(entry => {
             const name = entry[0];
             return (

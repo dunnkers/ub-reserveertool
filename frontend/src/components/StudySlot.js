@@ -2,11 +2,13 @@ import React from 'react';
 import { Badge,
      Button,
      Card,
-     Tooltip } from 'antd';
+     Tooltip, Tag} from 'antd';
 import { CloseCircleOutlined,
         EditOutlined,
         BellOutlined,
-        CheckOutlined } from '@ant-design/icons';
+        CheckOutlined,
+        InfoCircleOutlined } from '@ant-design/icons';
+import moment from 'moment';
 
 export default class StudySlot extends React.Component {
   render() {
@@ -22,9 +24,12 @@ export default class StudySlot extends React.Component {
     const trigger = this.props.trigger;
     const force = this.props.force;
 
-    const regmsg = result.registration_msg;
-    const fully_booked = regmsg && regmsg.msg.includes('fully booked');
-    const not_open = regmsg && regmsg.msg.includes('Registrations open at');
+    // const fully_booked = result.seatsleft === 0;
+    const msg = result.registration_msg && result.registration_msg.msg ? 
+      result.registration_msg.msg : 'No info'
+    const fully_booked = msg.includes('fully booked') ||
+      result.seatsleft === 0;
+    // const not_open = msg.includes('Registrations open at');
     let triggertime = new Date(result.startdt);
     triggertime.setDate(triggertime.getDate() - 4);
     let triggerdate = triggertime.toDateString() + ' ' + triggertime.toLocaleTimeString();
@@ -35,23 +40,25 @@ export default class StudySlot extends React.Component {
         extra={
           <>
             {fully_booked &&
-              <Tooltip title={result.registration_msg.msg}>
+              <Tooltip title={msg}>
                 <Badge count={0} showZero>
                 </Badge>
               </Tooltip>
             }
-            {not_open &&
-              <Tooltip title={result.registration_msg.msg}>
-                <Badge count={90}
+            {!fully_booked && !result.registration_enabled &&
+              <Tooltip title={msg}>
+                <Badge count={'All left'}
                   className="site-badge-count-4">
                 </Badge>
               </Tooltip>
             }
-            <Tooltip title={result.seatsleft_text}>
-              <Badge count={result.seatsleft}
-                style={{ backgroundColor: '#52c41a' }}>
-              </Badge>
-            </Tooltip>
+            {result.seatsleft > 0 &&
+              <Tooltip title={result.seatsleft_text}>
+                <Badge count={result.seatsleft}
+                  style={{ backgroundColor: '#52c41a' }}>
+                </Badge>
+              </Tooltip>
+            }
           </>
         }
         style={{ maxWidth: 330, textAlign: 'left',
@@ -100,7 +107,20 @@ export default class StudySlot extends React.Component {
               </Tooltip>}
             </>
         ]}>
-        {result.title}
+        <p>
+          <Tag>
+            {moment(result.startdt).format('HH:mm:ss')}
+          </Tag>
+          <span>→ </span>
+          <Tag>
+            {moment(result.enddt).format('HH:mm:ss')}
+          </Tag>
+        </p>
+        @ {result.location} <Tooltip 
+            title={result.title}
+          >
+            <InfoCircleOutlined />
+          </Tooltip>
       </Card>
     )
   }
