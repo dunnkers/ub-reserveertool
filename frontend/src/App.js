@@ -1,4 +1,4 @@
-import { message, Card, Checkbox } from 'antd';
+import { message, Card, Checkbox,Select } from 'antd';
 import 'antd/dist/antd.css';
 import $ from 'jquery';
 import React from 'react';
@@ -8,9 +8,43 @@ import Account from './components/Account';
 import { constructPostForm } from './util/util'; 
 import { BACKEND } from './util/config';
 
+const { Option } = Select;
+
 const INIT_STATE = {results: []};
 const INIT_ACC_STATE = {reservations:[],triggers:[],filtered:false,
   account: null};
+const LIBCAL = {
+  'Heymans': {
+    'cal_id': '7736',
+    'fid': '5517',
+    'domain': 'libcal-gmw.rug.nl',
+  },
+  'UB': {
+    'cal_id': '7564',
+    'fid': '5455',
+    'domain': 'libcal.rug.nl',
+  },
+  'Harmonie ARTS': {
+    'cal_id': '7814',
+    'fid': '5569',
+    'domain': 'libcal-arts.rug.nl'
+  },
+  'Harmonie JUR': {
+    'cal_id': '7666',
+    'fid': '5503',
+    'domain': 'libcal-jur.rug.nl'
+  },
+  'Oude Boteringe 18': {
+    'cal_id': '7836',
+    'fid': '5503',
+    'domain': 'libcal-jur.rug.nl'
+  },
+  'Duisenberg': {
+    'cal_id': '7770',
+    'fid': '5558',
+    'domain': 'libcal-feb.rug.nl'
+  }
+}
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -71,24 +105,44 @@ class App extends React.Component {
     //   console.warn(err);
     //   window.history.replaceState(null, '', savedPath+savedSearch);
     // });
-    let libcal = {};
-    if (window.location.pathname === '/glazengebouwtje') {
-      libcal['cal_id'] = '7736';
-      libcal['fid']    = '5517';
-      libcal['domain'] = 'libcal-gmw.rug.nl';
-    } else { // UB
-      libcal['cal_id'] = '7564';
-      libcal['fid']    = '5455';
-      libcal['domain'] = 'libcal.rug.nl';
+    // let libcal = {};
+    // if (window.location.pathname === '/glazengebouwtje') {
+    //   libcal['cal_id'] = '7736';
+    //   libcal['fid']    = '5517';
+    //   libcal['domain'] = 'libcal-gmw.rug.nl';
+    // } else { // UB
+    //   libcal['cal_id'] = '7564';
+    //   libcal['fid']    = '5455';
+    //   libcal['domain'] = 'libcal.rug.nl';
+    // }
+    let libcal = LIBCAL['UB'];
+    let name = 'UB';
+    if (!!window.location.pathname) {
+      const urlname = window.location.pathname.split('/')[1]
+      if (LIBCAL.hasOwnProperty(urlname)) {
+        name = urlname;
+        libcal = LIBCAL[name];
+      }
     }
+    libcal['name'] = name;
     const force = !!(window.location.search.substr(1) === 'force');
 
-    $.ajax({
-      url: `https://${libcal['domain']}/ajax/calendar/list?c=${libcal['cal_id']}&date=0000-00-00&perpage=96&page=1&audience=undefined&cats=&camps=&inc=0`,
-      // https://libcal-gmw.rug.nl/ajax/calendar/list?c=7736&date=0000-00-00&perpage=48&page=1&audience=undefined&cats=&camps=undefined&inc=0&callback=s_lc_calendar_card
-      dataType: 'jsonp'
-    })
-    .done((data) => this.setState({...data, libcal, force }))
+    this.setLibcal(libcal, force);
+  }
+
+  setLibcal(libcal, force=false) {
+    return new Promise((resolve) => {
+
+      $.ajax({
+        url: `https://${libcal['domain']}/ajax/calendar/list?c=${libcal['cal_id']}&date=0000-00-00&perpage=96&page=1&audience=undefined&cats=&camps=&inc=0`,
+        // https://libcal-gmw.rug.nl/ajax/calendar/list?c=7736&date=0000-00-00&perpage=48&page=1&audience=undefined&cats=&camps=undefined&inc=0&callback=s_lc_calendar_card
+        dataType: 'jsonp'
+      })
+      .done((data) => {
+        this.setState({...data, libcal, force });
+        resolve();
+      })
+    });
   }
 
   dateToStr(date) {
@@ -174,6 +228,12 @@ class App extends React.Component {
     this.setState({ filtered: e.target.checked });
   }
 
+  changeLibcal(name) {
+    if (!LIBCAL.hasOwnProperty(name)) return console.warn('incorrect select');
+    message.success(`${name}`)
+    this.setLibcal(LIBCAL[name]);
+  }
+
   render() {
     return (
       <div className="App">
@@ -190,6 +250,14 @@ class App extends React.Component {
             Show only my reservations
           </Checkbox>
         }
+        <Select defaultValue='UB' style={{ width: 120 }} onChange={e => this.changeLibcal(e)}>
+          {Object.entries(LIBCAL).map(entry => {
+            const name = entry[0];
+            return (
+              <Option value={name}>{name}</Option>
+            );
+          })}
+        </Select>
         <div style={{margin:'30px',
           display:'grid',
           gridTemplateColumns: 'repeat(auto-fill,minmax(330px,1fr))',

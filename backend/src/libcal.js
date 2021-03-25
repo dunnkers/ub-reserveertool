@@ -7,6 +7,11 @@ const LIBCAL = {
     domain: 'libcal.rug.nl'
 };
 
+// JUR and ARTS
+// formData[q2]: Data Science
+// formData[q3][]: Yes
+
+
 async function beginRegistration(event_id, libcal=LIBCAL) {
     const post = bent(`https://${libcal['domain']}/ajax/event/`, 'POST', 'json', 200);
     return await post(`begin/${event_id}`, {}, {
