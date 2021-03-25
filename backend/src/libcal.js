@@ -7,11 +7,6 @@ const LIBCAL = {
     domain: 'libcal.rug.nl'
 };
 
-// JUR and ARTS
-// formData[q2]: Data Science
-// formData[q3][]: Yes
-
-
 async function beginRegistration(event_id, libcal=LIBCAL) {
     const post = bent(`https://${libcal['domain']}/ajax/event/`, 'POST', 'json', 200);
     return await post(`begin/${event_id}`, {}, {
@@ -21,14 +16,29 @@ async function beginRegistration(event_id, libcal=LIBCAL) {
 
 async function performRegistration(id, event_id, user, libcal=LIBCAL) {
     const post = bent(`https://${libcal['domain']}/ajax/event/`, 'POST', 'json', 200);
+    let extra = {
+    };
+    switch (libcal['domain']) {
+        case 'libcal-jur.rug.nl':
+        case 'libcal-arts.rug.nl':
+            extra['q2'] = 'Rechten';
+            extra['q3'] = {
+                '': 'Yes'
+            };
+            console.log('adding extra question information for JUR/ARTS.');
+        default:
+            break;
+    }
+    
     return await post(`submit/${event_id}`, formurlencoded({
         id,
         formData: {
             event_id,
-            'cal_id': libcal['cal_id'], // heymans: 7736
+            'cal_id': libcal['cal_id'],
             'wl': '0',
             'qcount': '1',
-            'fid': libcal['fid'],    // heymans: 5517
+            'fid': libcal['fid'],
+            ...extra,
             ...user
         }
     }), {
