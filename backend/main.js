@@ -13,31 +13,37 @@ const LIBCAL = {
         'cal_id': '7736',
         'fid': '5517',
         'domain': 'libcal-gmw.rug.nl',
+        'timing': 14
     },
     '7564': { //UB
         'cal_id': '7564',
         'fid': '5455',
         'domain': 'libcal.rug.nl',
+        'timing': 4
     },
     '7814': { //Harmonie ARTS
         'cal_id': '7814',
         'fid': '5569',
-        'domain': 'libcal-arts.rug.nl'
+        'domain': 'libcal-arts.rug.nl',
+        'timing': 2
     },
     '7666': { //Harmonie JUR
         'cal_id': '7666',
         'fid': '5503',
-        'domain': 'libcal-jur.rug.nl'
+        'domain': 'libcal-jur.rug.nl',
+        'timing': 2
     },
     '7836': { //Oude Boteringe 18
         'cal_id': '7836',
         'fid': '5503',
-        'domain': 'libcal-jur.rug.nl'
+        'domain': 'libcal-jur.rug.nl',
+        'timing': 7
     },
     '7770': { //Duisenberg
         'cal_id': '7770',
         'fid': '5558',
-        'domain': 'libcal-feb.rug.nl'
+        'domain': 'libcal-feb.rug.nl',
+        'timing': 7
     }
 };
 
@@ -183,9 +189,14 @@ app.post('/add_account', (req, res) => {
 })
 
 function scheduleReservation(event_id, email, startdt, cal_id) {
+    if (!LIBCAL.hasOwnProperty(cal_id)) return console.warn('Invalid cal_id', cal_id);
+    const libcal = LIBCAL[cal_id];
+    const timing = libcal.hasOwnProperty('timing') ? 
+        libcal['timing'] : 4;
+
     // 4 days in advance
     let date = new Date(startdt);
-    date.setDate(date.getDate() - 4);
+    date.setDate(date.getDate() - timing);
     date.setSeconds(date.getSeconds() + 1);
 
     // node-cron dep tz-offset out of date so timezones not working correctly.
@@ -211,7 +222,7 @@ function scheduleReservation(event_id, email, startdt, cal_id) {
     cron.schedule(`${sec} ${min} ${hr} ${day} ${month} *`, () => {
         console.log('trigger triggered:',event_id,email,', start date =',
             new Date(startdt));
-        registration(event_id, email, LIBCAL[cal_id]).then(result => {
+        registration(event_id, email, libcal).then(result => {
             console.log('trigger succeeded ', result)
             client.srem(email+':triggers', event_id);
         }).catch(err => {
