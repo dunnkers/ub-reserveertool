@@ -7,6 +7,7 @@ import StudySlot from './components/StudySlot';
 import Account from './components/Account';
 import { constructPostForm } from './util/util'; 
 import { BACKEND } from './util/config';
+import moment from 'moment';
 
 const { Option } = Select;
 
@@ -51,7 +52,7 @@ class App extends React.Component {
     this.state = {
       ...INIT_STATE,
       ...INIT_ACC_STATE, 
-      libcal: {},
+      libcal: 'UB',
       force: false
     };
   }
@@ -115,33 +116,60 @@ class App extends React.Component {
     //   libcal['fid']    = '5455';
     //   libcal['domain'] = 'libcal.rug.nl';
     // }
-    let libcal = LIBCAL['UB'];
     let name = 'UB';
+    
     if (!!window.location.pathname) {
       const urlname = window.location.pathname.split('/')[1]
       if (LIBCAL.hasOwnProperty(urlname)) {
         name = urlname;
-        libcal = LIBCAL[name];
       }
     }
-    libcal['name'] = name;
     const force = !!(window.location.search.substr(1) === 'force');
 
-    this.setLibcal(libcal, force);
+    this.setLibcal(name, force);
+  }
+
+  getEvents(libcal_name, total=96) {
+    if (!LIBCAL.hasOwnProperty(libcal_name)) return console.warn('no libcal for', libcal_name);
+    const libcal = LIBCAL[libcal_name];
+    return new Promise(resolve => {
+      $.ajax({
+        url: `https://${libcal['domain']}/ajax/calendar/list?c=${libcal['cal_id']}&date=0000-00-00&perpage=${total}&page=1&audience=undefined&cats=&camps=&inc=0`,
+        dataType: 'jsonp'
+      }).done(data => {
+        data['libcal_name'] = libcal_name;
+        resolve(data);
+      })
+    });
+  }
+
+  parseLibcalData(data) {
+    if (!data || !data.results) return data;
+    return data.results.map(result => {
+      result['startdt_m'] = moment(result.startdt);
+      result['enddt_m'] = moment(result.enddt);
+      result['libcal_name'] = data.libcal_name;
+      return result;
+    })
+  }
+
+  setAllEvents() {
+    return Promise.all(
+      Object.entries(LIBCAL).map(entry => {
+        const libcal_name = entry[0];
+        return this.getEvents(libcal_name, 20);
+      })
+    ).then(data => {
+      const results = data.map(this.parseLibcalData)
+        .reduce((acc, curr) => acc.concat(curr))
+      this.setState({ results });
+    });
   }
 
   setLibcal(libcal, force=false) {
-    return new Promise((resolve) => {
-
-      $.ajax({
-        url: `https://${libcal['domain']}/ajax/calendar/list?c=${libcal['cal_id']}&date=0000-00-00&perpage=96&page=1&audience=undefined&cats=&camps=&inc=0`,
-        // https://libcal-gmw.rug.nl/ajax/calendar/list?c=7736&date=0000-00-00&perpage=48&page=1&audience=undefined&cats=&camps=undefined&inc=0&callback=s_lc_calendar_card
-        dataType: 'jsonp'
-      })
-      .done((data) => {
-        this.setState({...data, libcal, force });
-        resolve();
-      })
+    this.getEvents(libcal, 1).then(data => {
+      const results = this.parseLibcalData(data);
+      this.setState({ results, libcal, force });
     });
   }
 
@@ -151,7 +179,11 @@ class App extends React.Component {
 
   planReservering = event => {
     const event_id = event.id;
-    console.log('reserveren, id=', event_id);
+    console.log('reserveren, id=', event_id, 'libcal', event.libcal_name);
+    if (!LIBCAL.hasOwnProperty(event.libcal_name)) {
+      return console.warn('invalid libacal');
+    }
+    const libcal = LIBCAL[event.libcal_name];
     const startdt = event.startdt;
     const regmsg = event.registration_msg;
     const fully_booked = regmsg && regmsg.msg.includes('fully booked');
@@ -163,7 +195,7 @@ class App extends React.Component {
       not_open,
       startdt,
       force: this.state.force,
-      ...this.state.libcal
+      ...libcal
     }))
     .then(response => {
       if (!response.ok) throw response;
@@ -229,12 +261,33 @@ class App extends React.Component {
   }
 
   changeLibcal(name) {
+    this.setState({libcal:name});
+    if (name === 'All') {
+      this.setAllEvents();
+      return;
+    }
     if (!LIBCAL.hasOwnProperty(name)) return console.warn('incorrect select');
     // message.success(`${name}`)
-    this.setLibcal(LIBCAL[name]);
+    this.setLibcal(name);
   }
 
   render() {
+    let res;
+    if (this.state.results.length > 0) {
+      res = this.state.results.map(result => {
+                const trigger = this.state.triggers.includes(String(result.id));
+                const booked = this.state.reservations.includes(String(result.id)) ||
+                                trigger;
+                return {
+                  trigger,
+                  booked,
+                  ...result
+                };
+              })
+              .filter(result => this.state.filtered ? result.booked : true);
+      res.sort((a, b) => a.startdt_m - b.startdt_m)
+    }
+
     return (
       <div className="App">
         <div className="logo">{this.state.force && "Force mode"}</div>
@@ -250,14 +303,15 @@ class App extends React.Component {
             Show only my reservations
           </Checkbox>
         }
-        <Select defaultValue='UB' style={{ width: 120 }} onChange={e => this.changeLibcal(e)}
-          style={{width:150}}>
+        <Select value={this.state.libcal} style={{ width: 150 }}
+          onChange={e => this.changeLibcal(e)}>
           {Object.entries(LIBCAL).map(entry => {
             const name = entry[0];
             return (
               <Option value={name}>{name}</Option>
             );
           })}
+          <Option value="All">All</Option>
         </Select>
         <div style={{margin:'30px',
           display:'grid',
@@ -265,19 +319,7 @@ class App extends React.Component {
           gridGap: '40px'
         }}>
           {
-            this.state.results.length > 0 ? 
-              this.state.results.map(result => {
-                const trigger = this.state.triggers.includes(String(result.id));
-                const booked = this.state.reservations.includes(String(result.id)) ||
-                                trigger;
-                return {
-                  trigger,
-                  booked,
-                  ...result
-                };
-              })
-              .filter(result => this.state.filtered ? result.booked : true)
-              .map(result => <StudySlot key={result.id}
+              res ? res.map(result => <StudySlot key={result.id}
                                         slotinfo={result}
                                         account={this.state.account}
                                         booked={result.booked}
