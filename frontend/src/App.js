@@ -49,75 +49,18 @@ const LIBCAL = {
 class App extends React.Component {
   constructor(props) {
     super(props);
+    const libcal = localStorage.getItem('libcal') || 'UB';
     this.state = {
       ...INIT_STATE,
       ...INIT_ACC_STATE, 
-      libcal: 'UB',
+      libcal,
       force: false,
       loadingEvents: false
     };
   }
 
   componentDidMount() {
-    // const formdata = constructPostForm({
-    //   lid: 1443,
-    //   gid: 3634,
-    //   eid: -1,
-    //   seat: 1,
-    //   seatId: 0,
-    //   zone: 0,
-    //   accessible: 0,
-    //   powered: 0,
-    //   start: '2020-11-22',
-    //   end: '2020-11-23',
-    //   pageIndex: 0,
-    //   pageSize: 18,
-    // });
-
-    // // https://www.trustedsec.com/blog/setting-the-referer-header-using-javascript/
-    // const savedPath = window.location.pathname;
-    // const savedSearch = window.location.search;
-    // window.history.replaceState(null, '', 'https://libcal.rug.nl/spaces?lid=1443');
-    // fetch(`https://libcal.rug.nl/spaces/availability/grid`, {
-    //   ...formdata,
-    //   headers: {
-    //     'accept': 'application/json, text/javascript, */*; q=0.01',
-    //     'accept-encoding': 'gzip, deflate, br',
-    //     'accept-language': 'en-US,en;q=0.9',
-    //     'content-length': '126',
-    //     'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    //     'dnt': '1',
-    //     'sec-fetch-dest': 'empty',
-    //     'sec-fetch-mode': 'cors',
-    //     'sec-fetch-site': 'same-origin',
-    //     'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36',
-    //     'x-requested-with': 'XMLHttpRequest',
-    //   },
-    //   mode: 'no-cors',
-    //   // origin: 'https://libcal.rug.nl',
-    //   // referrer: 'https://libcal.rug.nl/spaces?lid=1443',
-    //   referrerPolicy: "no-referrer"  
-    // })
-    // .then(response => {
-    //   if (!response.ok) throw response;
-    //   console.log(response.json());
-    //   window.history.replaceState(null, '', savedPath+savedSearch);
-    // })
-    // .catch(err => {
-    //   console.warn(err);
-    //   window.history.replaceState(null, '', savedPath+savedSearch);
-    // });
-    // let libcal = {};
-    // if (window.location.pathname === '/glazengebouwtje') {
-    //   libcal['cal_id'] = '7736';
-    //   libcal['fid']    = '5517';
-    //   libcal['domain'] = 'libcal-gmw.rug.nl';
-    // } else { // UB
-    //   libcal['cal_id'] = '7564';
-    //   libcal['fid']    = '5455';
-    //   libcal['domain'] = 'libcal.rug.nl';
-    // }
-    let name = 'UB';
+    let name = this.state.libcal;
     
     if (!!window.location.pathname) {
       const urlname = window.location.pathname.split('/')[1]
@@ -126,6 +69,7 @@ class App extends React.Component {
       }
     }
     const force = !!(window.location.search.substr(1) === 'force');
+
 
     this.setLibcal(name, force);
   }
@@ -265,6 +209,7 @@ class App extends React.Component {
 
   changeLibcal(name) {
     this.setState({libcal:name});
+    localStorage.setItem('libcal', name);
     if (name === 'All') {
       this.setAllEvents();
       return;
