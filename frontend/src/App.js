@@ -1,4 +1,4 @@
-import { message, Card, Checkbox,Select } from 'antd';
+import { message, Card, Checkbox,Select, Empty } from 'antd';
 import 'antd/dist/antd.css';
 import $ from 'jquery';
 import React from 'react';
@@ -53,7 +53,8 @@ class App extends React.Component {
       ...INIT_STATE,
       ...INIT_ACC_STATE, 
       libcal: 'UB',
-      force: false
+      force: false,
+      loadingEvents: false
     };
   }
 
@@ -154,6 +155,7 @@ class App extends React.Component {
   }
 
   setAllEvents() {
+    this.setState({loadingEvents: true});
     return Promise.all(
       Object.entries(LIBCAL).map(entry => {
         const libcal_name = entry[0];
@@ -162,14 +164,15 @@ class App extends React.Component {
     ).then(data => {
       const results = data.map(this.parseLibcalData)
         .reduce((acc, curr) => acc.concat(curr))
-      this.setState({ results });
+      this.setState({ results, loadingEvents: false });
     });
   }
 
   setLibcal(libcal, force=false) {
+    this.setState({loadingEvents: true});
     this.getEvents(libcal, 1).then(data => {
       const results = this.parseLibcalData(data);
-      this.setState({ results, libcal, force });
+      this.setState({ results, libcal, force, loadingEvents: false });
     });
   }
 
@@ -272,9 +275,8 @@ class App extends React.Component {
   }
 
   render() {
-    let res;
-    if (this.state.results.length > 0) {
-      res = this.state.results.map(result => {
+    let res = this.state.results || [];
+    res = res.map(result => {
                 const trigger = this.state.triggers.includes(String(result.id));
                 const booked = this.state.reservations.includes(String(result.id)) ||
                                 trigger;
@@ -286,7 +288,6 @@ class App extends React.Component {
               })
               .filter(result => this.state.filtered ? result.booked : true);
       res.sort((a, b) => a.startdt_m - b.startdt_m)
-    }
 
     return (
       <div className="App">
@@ -319,28 +320,34 @@ class App extends React.Component {
           gridGap: '40px'
         }}>
           {
-              res ? res.map(result => <StudySlot key={result.id}
-                                        slotinfo={result}
-                                        account={this.state.account}
-                                        booked={result.booked}
-                                        force={this.state.force}
-                                        planReservering={
-                                          (result) => this.planReservering(result)
-                                        }
-                                        cancelReservering={
-                                          (result) => this.cancelReservation(result)
-                                        }
-                                        trigger={result.trigger}
-                                        />)
-              : <>
-              <Card loading={true} style={{ width: 320 }} />
-              <Card loading={true} style={{ width: 320 }} />
-              <Card loading={true} style={{ width: 320 }} />
-              <Card loading={true} style={{ width: 320 }} />
-              <Card loading={true} style={{ width: 320 }} />
-              <Card loading={true} style={{ width: 320 }} />
-              <Card loading={true} style={{ width: 320 }} />
-            </>
+            this.state.loadingEvents ? 
+              <>
+                <Card loading={true} style={{ width: 320 }} />
+                <Card loading={true} style={{ width: 320 }} />
+                <Card loading={true} style={{ width: 320 }} />
+                <Card loading={true} style={{ width: 320 }} />
+                <Card loading={true} style={{ width: 320 }} />
+                <Card loading={true} style={{ width: 320 }} />
+                <Card loading={true} style={{ width: 320 }} />
+              </>
+            :
+            (res.length === 0 ? 
+              <Empty />
+              :
+            res.map(result => <StudySlot key={result.id}
+              slotinfo={result}
+              account={this.state.account}
+              booked={result.booked}
+              force={this.state.force}
+              planReservering={
+                (result) => this.planReservering(result)
+              }
+              cancelReservering={
+                (result) => this.cancelReservation(result)
+              }
+              trigger={result.trigger}
+              />)
+            )
           }
         </div>
       </div>
