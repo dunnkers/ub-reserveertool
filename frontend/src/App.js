@@ -25,12 +25,12 @@ const LIBCAL = {
     'fid': '5455',
     'domain': 'libcal.rug.nl',
   },
-  'Harmonie ARTS': {
+  'Harmonie - Faculty of Arts': {
     'cal_id': '7814',
     'fid': '5569',
     'domain': 'libcal-arts.rug.nl'
   },
-  'Harmonie JUR': {
+  'Harmonie - Juridische Faculteit': {
     'cal_id': '7666',
     'fid': '5503',
     'domain': 'libcal-jur.rug.nl'

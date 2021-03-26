@@ -36,7 +36,11 @@ export default class StudySlot extends React.Component {
     return (
       <Card
         key={result.id}
-        title={result.date}
+        title={<>
+            <span>{result.date}</span>
+            <small style={{display:'block'}}>{result.libcal_name}</small>
+          </>
+        }
         extra={
           <>
             {fully_booked &&
