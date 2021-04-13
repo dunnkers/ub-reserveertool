@@ -62,3 +62,11 @@ redis-commander
 ```
 
 > add more connections to have them also show up in the interface.
+
+### DigitalOcean node
+
+```shell
+pm2 logs main --lines 150
+pm2 status
+SOME_VAR=<some_value> pm2 restart main --update-env
+```
