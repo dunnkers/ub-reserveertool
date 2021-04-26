@@ -1,6 +1,21 @@
 # UB reserveertool
 By Jeroen Overschie
 
+
+<table>
+  <tr>
+    <td colspan="2"><img src='docs/main.png' /></td>
+  </tr>
+  <tr>
+    <td>
+        <img src="docs/seats-left.png" alt="seats-left"/>
+    </td>
+    <td>
+        <img src="docs/book-in-now.png" alt="book-in-now"/>
+    </td>
+  </tr>
+</table>
+
 ## Pushing backend to Docker Hub
 1. `docker build -t ub-backend .`
 2. `docker tag ub-backend:latest dunnkers/ub-reserveertool:backend`
