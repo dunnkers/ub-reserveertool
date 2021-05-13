@@ -85,3 +85,10 @@ pm2 logs main --lines 150
 pm2 status
 SOME_VAR=<some_value> pm2 restart main --update-env
 ```
+
+
+### Deploying to 5apps
+
+```shell
+yarn deploy
+```
