@@ -1,10 +1,9 @@
-import { message, Card, Checkbox,Select, Empty, Pagination } from 'antd';
+import { message, Card, Checkbox,Select, Empty, Pagination, Menu, Spin } from 'antd';
 import 'antd/dist/antd.css';
 import $ from 'jquery';
 import React from 'react';
 import './App.css';
 import StudySlot from './components/StudySlot';
-import Account from './components/Account';
 import { constructPostForm } from './util/util'; 
 import { BACKEND } from './util/config';
 import moment from 'moment';
@@ -50,6 +49,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     const libcal = localStorage.getItem('libcal') || 'UB';
+    const showOnlyAvailable = localStorage.getItem("showOnlyAvailable") || false;
     this.state = {
       ...INIT_STATE,
       ...INIT_ACC_STATE, 
@@ -58,7 +58,9 @@ class App extends React.Component {
       loadingEvents: false,
       page: 1,
       total_results: 20,
-      pageSize: 20
+      pageSize: 20,
+      showOnlyAvailable,
+      availableSpinning: false
     };
   }
 
@@ -227,6 +229,27 @@ class App extends React.Component {
     this.setState({ filtered: e.target.checked });
   }
 
+  showOnlyAvailable(e) {
+    localStorage.setItem("showOnlyAvailable", e.target.checked);
+    this.setState({ showOnlyAvailable: e.target.checked });
+  }
+
+  changeShowOnlyAvailable(e) {
+    this.setState({availableSpinning: true});
+
+    return new Promise((resolve => {
+
+      let current = this.state.showOnlyAvailable;
+      localStorage.setItem("showOnlyAvailable", !current);
+      this.setState({ showOnlyAvailable: !current });
+  
+      resolve();
+    })).then(val => {
+      this.setState({availableSpinning: false});
+      return true;
+    })
+  }
+
   changeLibcal(name) {
     this.setState({libcal:name});
     localStorage.setItem('libcal', name);
@@ -250,25 +273,43 @@ class App extends React.Component {
                   ...result
                 };
               })
-              .filter(result => this.state.filtered ? result.booked : true);
+              .filter(result => this.state.filtered ? result.booked : true)
+              .filter(result => {
+                if (!this.state.showOnlyAvailable) return true;
+
+                // same code like in StudySlot
+                const msg = result.registration_msg && result.registration_msg.msg ? 
+                  result.registration_msg.msg : 'No info'
+                const fully_booked = msg.includes('fully booked') || 
+                  result.seatsleft === 0;
+                return !fully_booked && result.seatsleft > 0
+              });
       res.sort((a, b) => a.startdt_m - b.startdt_m)
 
     return (
       <div className="App">
-        <div className="logo">{this.state.force && "Force mode"}</div>
-        <Account 
+        <div className="logo">RUG studieplekken{this.state.force && "Force mode"}</div>
+        {/* <Account 
           setReservations={() => this.setReservations()}
           setAccount={accinfo => this.setState(accinfo)}
           style={{float:'right'}}
           loggedOut={() => this.setState(INIT_ACC_STATE)}
-          />
+          /> */}
+        <Menu theme="dark" mode="horizontal">
+          <Menu.Item>
+            {/* RUG studieplekken */}
+          </Menu.Item>
+        </Menu>
+
+
         {/* <h2 style={{marginTop: '10px' }}>Reservations</h2> */}
-        {this.state.account &&
+        {/* {this.state.account &&
           <Checkbox style={{marginTop:'10px'}} onChange={e => this.filter(e)}>
             Show only my reservations
           </Checkbox>
-        }
-        <Select value={this.state.libcal} style={{ width: 150 }}
+        } */}
+        <label>Place: </label>
+        <Select value={this.state.libcal} style={{ width: 150, marginTop: '15px' }}
           onChange={e => this.changeLibcal(e)}>
           {Object.entries(LIBCAL).map(entry => {
             const name = entry[0];
@@ -278,6 +319,16 @@ class App extends React.Component {
           })}
           <Option value="All">All</Option>
         </Select>
+        <p>
+          <Spin spinning={this.state.availableSpinning}>
+            <Checkbox checked={this.state.showOnlyAvailable} onClick={e => this.changeShowOnlyAvailable(e)}
+            style={{marginTop:'10px'}} 
+            // onChange={e => this.showOnlyAvailable(e)}
+            >
+              Show only available spots
+            </Checkbox>
+          </Spin>
+        </p>
         <Pagination 
           style={{margin: '20px 10px'}}
           onChange={(page, pageSize) => this.onPaginate(page, pageSize)}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge,
-     Button,
+     Button, Typography,
      Card,
      Tooltip, Tag} from 'antd';
 import { CloseCircleOutlined,
@@ -9,6 +9,7 @@ import { CloseCircleOutlined,
         CheckOutlined,
         InfoCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
+const {Link}=Typography;
 
 export default class StudySlot extends React.Component {
   render() {
@@ -69,47 +70,60 @@ export default class StudySlot extends React.Component {
           border: booked ? '2px solid #c0ffa7' : '1px solid #f0f0f0'
         }}
         actions={[
-          <Tooltip title={
-            account ? (
-              accinfo ? (
-                booked ? (
-                  trigger ? (
-                    "Trigger set for " + triggerdate
-                    ) : "You are booked in ✓"
-                  )
-                  : (
-                    force || result.registration_enabled ? "Book in now" : (
-                      fully_booked ? "Full" : "Book in when reservations open"
-                      )
-                    )   
-              )
-              : 'Fill in account info first.'
-            ) : 'Login first'
-            }>
-            <Button
-              type="default"
-              icon={booked ? 
-                    (trigger ? <BellOutlined key="trigger" /> :
-                      <CheckOutlined key="booked" />)
-                  :
-                (force || result.registration_enabled ?
-                <EditOutlined key="edit" /> :
-                <BellOutlined key="schedule" />)}
-              onClick={() => this.props.planReservering(result)}
-              disabled={!force && (!account || fully_booked || booked || !accinfo)}
-              />
-            </Tooltip>,
-            <>{(trigger || booked) &&
-              <Tooltip title={trigger ?
-                "Cancel scheduled reservation" : "Cancel via email"}>
-                <Button 
-                    onClick={() => this.props.cancelReservering(result)}
-                    type="default"
-                    icon={<CloseCircleOutlined key="cancel" />}
-                    disabled={!trigger}
-                />
-              </Tooltip>}
-            </>
+          <>
+            {(!fully_booked && result.seatsleft > 0) ?
+              <Link href={result.url} className="ant-btn" target="_blank" >
+                Reserve at libcal.rug.nl
+                <img src="external-link.jpeg" style={{margin: '0 3px'}} />
+              </Link>
+              :
+              <Button disabled={true}>
+                Reserve at libcal.rug.nl
+                <img src="external-link.jpeg" style={{margin: '0 7px', marginTop: '-5px', opacity: '70%'}} />
+              </Button>  
+            }
+          </>,
+          // <Tooltip title={
+          //   account ? (
+          //     accinfo ? (
+          //       booked ? (
+          //         trigger ? (
+          //           "Trigger set for " + triggerdate
+          //           ) : "You are booked in ✓"
+          //         )
+          //         : (
+          //           force || result.registration_enabled ? "Book in now" : (
+          //             fully_booked ? "Full" : "Book in when reservations open"
+          //             )
+          //           )   
+          //     )
+          //     : 'Fill in account info first.'
+          //   ) : 'Login first'
+          //   }>
+          //   <Button
+          //     type="default"
+          //     icon={booked ? 
+          //           (trigger ? <BellOutlined key="trigger" /> :
+          //             <CheckOutlined key="booked" />)
+          //         :
+          //       (force || result.registration_enabled ?
+          //       <EditOutlined key="edit" /> :
+          //       <BellOutlined key="schedule" />)}
+          //     onClick={() => this.props.planReservering(result)}
+          //     disabled={!force && (!account || fully_booked || booked || !accinfo)}
+          //     />
+          //   </Tooltip>,
+          //   <>{(trigger || booked) &&
+          //     <Tooltip title={trigger ?
+          //       "Cancel scheduled reservation" : "Cancel via email"}>
+          //       <Button 
+          //           onClick={() => this.props.cancelReservering(result)}
+          //           type="default"
+          //           icon={<CloseCircleOutlined key="cancel" />}
+          //           disabled={!trigger}
+          //       />
+          //     </Tooltip>}
+          //   </>
         ]}>
         <p>
           <Tag>
